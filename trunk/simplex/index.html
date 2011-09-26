@@ -13,12 +13,23 @@
 		<!--Load the AJAX API-->
     	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
     	
-    	<!-- Simplex -->
-    	<script type="text/javascript" src="lib/simplex.js"></script>
+
     
         <title>Simplex</title>
     </head>
     <body>
-        <h1>Simplex Solver</h1>
+    	<div data-role="page" id="Solver" name="Solver" data-theme="a">
+	        <h1>Simplex Solver</h1>
+	        <div id="inputPage">
+		        <p>Introduzca el número de variables</p>
+		        <input type="text" size="3" id="numVar"/>
+		        <p>Introduzca el número de restricciones</p>
+		        <input type="text" size="3" id="numRes"/>
+		        <input type="button" value="Iniciar" id="iniciar" />
+		    </div>
+		</div>
+		
+		<!-- Simplex -->
+    	<script type="text/javascript" src="lib/simplex.js"></script>
     </body>
 </html>
