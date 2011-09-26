@@ -5,14 +5,16 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         
         <!-- jQuery mobile -->
-        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0b3/jquery.mobile-1.0b3.min.css" />
+        <!--<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0b3/jquery.mobile-1.0b3.min.css" />-->
 		<script src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
-		<script src="http://code.jquery.com/mobile/1.0b3/jquery.mobile-1.0b3.min.js"></script>
+		<!--<script src="http://code.jquery.com/mobile/1.0b3/jquery.mobile-1.0b3.min.js"></script>-->
 		
 		<!-- Google charts -->
 		<!--Load the AJAX API-->
     	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    	
+    	<script type="text/javascript">
+    		google.load('visualization', '1.0', {'packages':['corechart']});
+    	</script>
 
     
         <title>Simplex</title>
@@ -20,13 +22,24 @@
     <body>
     	<div data-role="page" id="Solver" name="Solver" data-theme="a">
 	        <h1>Simplex Solver</h1>
-	        <div id="inputPage">
+	        <div id="startupSection">
 		        <p>Introduzca el número de variables</p>
 		        <input type="text" size="3" id="numVar"/>
 		        <p>Introduzca el número de restricciones</p>
-		        <input type="text" size="3" id="numRes"/>
+		        <input type="text" size="3" id="numRes"/><br />
 		        <input type="button" value="Iniciar" id="iniciar" />
 		    </div>
+		    <div id="inputSection">
+		    	<p>Función objetivo</p>
+		    </div
+		    <div id="resultSection">
+		    	<div id="result">
+		    		
+		    	</div>
+		    	<div id="graph">
+		    		
+		    	</div>
+		    </div>	
 		</div>
 		
 		<!-- Simplex -->
