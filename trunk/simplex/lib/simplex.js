@@ -1,16 +1,3 @@
-// CONSTANTS
-JEVENTS = {
-		CLICK: "click",
-		TAP: "tap",
-		TAPHOLD: "taphold",
-		SWIPE: "swipe",
-		PAGE_BEFORE_SHOW: "pagebeforeshow",
-		PAGE_BEFORE_HIDE: "pagebeforehide",
-		PAGE_SHOW: "pageshow",
-		PAGE_HIDE: "pagehide",
-		PAGE_BEFORE_CREATE: "pagebeforecreate",
-		PAGE_CREATE: "pagecreate"
-}
 
 /**
  *  1. Simplex "maximizar s.a."
@@ -275,7 +262,7 @@ Simplex.createRow = function(rows, id, ld) {
 $(new function() {
 	$("div#inputSection").hide();
 	$("div#resultSection").hide();
-	$('#iniciar').bind(JEVENTS.CLICK, Simplex.showOptions);
+	$('#iniciar').bind("click", Simplex.showOptions);
 });
 
 // --------------- SOLVER ----------------
