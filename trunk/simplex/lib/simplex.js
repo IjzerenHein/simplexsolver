@@ -87,22 +87,35 @@ Simplex.prototype.displayGraph = function() {
 	
 	// Determine max value
 	var max = Math.max(res[0], res[1]);
+
+	var copy = si.backup;
+	copy.shift(); // names row
+	
+	var rRow = copy.shift(); // objective function 
+	rRow[rRow.length - 1] = res[res.length - 1];
+	rRow[2] = rRow[2]*-1;
+	rRow[3] = rRow[3]*-1;
+	var rPoints = si.getPoints(rRow);
 	
 	// Get points for objective function
-	var x1 = res[0];
-	var x2 = res[1];
-	data.addRows(2 + si.numRestricciones);
+	var x1 = rPoints[0];
+	var x2 = rPoints[1];
+	data.addRows(2 + si.numRestricciones*2);
 	data.setValue(0,0,x1);
 	data.setValue(0,1,0);
 	data.setValue(1,0,0);
 	data.setValue(1,1,x2);
 	
-	var copy = si.backup;
-	copy.shift(); // names row
-	copy.shift(); // objective function
+	
 	
 	for (var i = 0; i < si.numRestricciones; i++) {
 		var points = si.getPoints(copy.shift());
+		console.log(points);
+		
+		data.setValue(2 + (i*2), 0, points[0]);
+		data.setValue(2 + (i*2), 2+i, points[0] != 0? 0:points[1]);
+		data.setValue(3 + (i*2), 0, points[1] != 0 ? 0:points[0]);
+		data.setValue(3 + (i*2), 2+i, points[1]);
 	}
 	
 	var chart = new google.visualization.ScatterChart(document.getElementById("graph"));
@@ -117,9 +130,10 @@ Simplex.prototype.displayGraph = function() {
 }
 
 Simplex.prototype.getPoints = function(row) {
+	console.log(row.toString());
 	var x1 = row[2];
 	var x2 = row[3];
-	var ld = row[row.length];
+	var ld = row[row.length-1];
 	var res = [0,0];
 	if (x1 !== 0) res[0] = ld / x1;
 	if (x2 !== 0) res[1] = ld / x2;
@@ -313,11 +327,12 @@ function masNegativo() {
 
 //eligo el menor coeficiente para el pivote horizontal
 function menorCoeficiente(){
-	var menorValor = tabla[2][tabla[2].length - 1] / tabla[2][pivoteV];
+	//var menorValor = tabla[2][tabla[2].length - 1] / tabla[2][pivoteV];
+        var menorValor = Number.MAX_VALUE;
 //	alert(menorValor);
 	for (var i=2;i<tabla.length;i++){
 		var temp = (tabla[i][tabla[i].length - 1]) / (tabla[i][pivoteV]);
-		if (temp <= menorValor){
+		if (temp <= menorValor && temp > 0){
 			menorValor = temp;
 			pivoteH = i;
 		}

@@ -115,17 +115,18 @@ function masNegativo() {
 
 //eligo el menor coeficiente para el pivote horizontal
 function menorCoeficiente(){
-    var menorValor = tabla[2][tabla[2].length - 1] / tabla[2][pivoteV];
-    //alert(menorValor);
-    for (var i=2;i<tabla.length;i++){
-   	var temp = (tabla[i][tabla[i].length - 1]) / (tabla[i][pivoteV]);
-        if (temp <= menorValor && temp >0){
-            menorValor = temp;
-            pivoteH = i;
-        }
-        //alert(menorValor);
-    }
-    alert(pivoteH);
+	//var menorValor = tabla[2][tabla[2].length - 1] / tabla[2][pivoteV];
+        var menorValor = Number.MAX_VALUE;
+//	alert(menorValor);
+	for (var i=2;i<tabla.length;i++){
+		var temp = (tabla[i][tabla[i].length - 1]) / (tabla[i][pivoteV]);
+		if (temp <= menorValor && temp > 0){
+			menorValor = temp;
+			pivoteH = i;
+		}
+//		alert(menorValor);
+	}
+	alert(pivoteH);
 }
 
 //divido la fila donde esta el pivote para hacerlo 1
