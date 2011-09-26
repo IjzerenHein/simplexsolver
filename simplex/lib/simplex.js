@@ -1,3 +1,16 @@
+// CONSTANTS
+JEVENTS = {
+		TAP: "tap",
+		TAPHOLD: "taphold",
+		SWIPE: "swipe",
+		PAGE_BEFORE_SHOW: "pagebeforeshow",
+		PAGE_BEFORE_HIDE: "pagebeforehide",
+		PAGE_SHOW: "pageshow",
+		PAGE_HIDE: "pagehide",
+		PAGE_BEFORE_CREATE: "pagebeforecreate",
+		PAGE_CREATE: "pagecreate"
+}
+
 /**
  *  1. Simplex "maximizar s.a."
  *  2. Mostrar gráfica
@@ -20,7 +33,7 @@ function Simplex() {}
  */
 Simplex.prototype.variables = {}
 
-/** Gest data from web form and completes the array with the info.
+/** Get data from web form and completes the array with the info.
  * 
  */
 Simplex.prototype.getData = function() {
@@ -35,6 +48,25 @@ Simplex.prototype.displayGraph = function() {
 	
 }
 
-S('button').click(function() {
-	// Aquí va lo que sucede cuando se da clic al botón de resolver.
+Simplex.prototype.run = function() {
+	var solver = new Simplex();
+	solver.getData();
+	solver.solve();
+	solver.displayGraph();
+	alert('saludos');
+}
+
+// UI functions
+Simplex.showOptions = function() {
+	console.log("Options");
+}
+
+Simplex.createTextField = function() {
+	var field = $(document.createElement("input"));
+	field.attr("type", "text");
+	
+}
+
+$('div#Solver').bind(JEVENTS.PAGE_BEFORE_SHOW, function() {
+	$('#iniciar').bind(JEVENTS.TAP, Simplex.showOptions);
 });
