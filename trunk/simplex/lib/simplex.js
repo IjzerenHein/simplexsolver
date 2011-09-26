@@ -123,9 +123,8 @@ Simplex.prototype.displayGraph = function() {
 					  title: "Grafica",
 					  hAxis: {title: "X1", minValue:0, maxValue: max},
 					  vAxis: {title: "X2", minValue:0, maxValue: max},
-					  legend: 'none',
-					  lineWidth: 1,
-					  series: [{}, {color:'green'}]
+					  legend: 'right',
+					  lineWidth: 1
 	});
 }
 
