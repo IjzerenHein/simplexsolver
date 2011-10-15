@@ -2,6 +2,11 @@
 
 function Transporte() { }
 
+Transporte.current = null;
+
+Transporte.prototype.tabla = null; //this.tabla con los costos
+Transporte.prototype.tabla2 = null;//this.tabla con las unidades
+
 Transporte.prototype.ejemplo = function() {
 
     var fila1 = new Array(5);
@@ -60,9 +65,6 @@ Transporte.prototype.ejemplo = function() {
     this.tabla2[4] = row5;
     
 };
-
-Transporte.prototype.tabla = null; //this.tabla con los costos
-Transporte.prototype.tabla2 = null;//this.tabla con las unidades
 
 Transporte.prototype.imprime = function() {
     document.write("<table width=200 border=1 cellpadding=1 cellspacing=1>");
@@ -159,7 +161,7 @@ UI.getRowData = function(id, ld) {
 	console.log("gettingRowData");
 	var r = $("#" + id);
 	console.log(r);
-	var si = Simplex.currentSimplex;
+	var si = Transporte.current;
 	var cols = 1 + si.numVariables + si.numRestricciones + 1;
 	
 	var a = new Array(cols);
@@ -194,27 +196,24 @@ UI.getRowData = function(id, ld) {
 };
 
 UI.showOptions = function() {
-	var si = new Simplex();
-	si.numVariables = parseFloat($("input#numVar").val());
-	si.numRestricciones = parseFloat($("input#numRes").val());
+	var si = new Transporte();
+	si.numOrigenes = parseFloat($("input#numVar").val());
+	si.numDestinos = parseFloat($("input#numRes").val());
 	
 	
-	Simplex.currentSimplex = si;
+	Transporte.current = si;
 	$("div#startupSection").hide();
 	var inputSection = $("div#inputSection");
-	var iSE = inputSection.get(0);
-	var objetivo = Simplex.createRow(si.numVariables, "objetivo");
-	iSE.appendChild(Simplex.createTextLabel("Muestra: " + si.getSampleEquation()));
-	iSE.appendChild(objetivo);
+	var iSE = inputSection.get(0); // Obtener sin jQuery
 	
-	iSE.appendChild(Simplex.createTextLabel("Sujeto a"));
-	for (var i = 0; i < si.numRestricciones; i++) {
-		iSE.appendChild(Simplex.createRow(si.numVariables, "restriccion"+i, true));
-	}
+	iSE.appendChild(UI.createTextLabel("Costos de transporte"));
+	iSE.appendChild(UI.createTable(si.numOrigenes, si.numDestinos, "origen"));
+	iSE.appendChild(document.createElement("br"));
 	
-	var boton = Simplex.createButton("Resolver", "resolver");
+	
+	var boton = UI.createButton("Resolver", "resolver");
 	$(boton).click(function() {
-		Simplex.currentSimplex.run();
+		Transporte.currentSimplex.run();
 		$("#inputSection").hide();
 		$("#resultSection").show();
 	});
@@ -248,23 +247,32 @@ UI.createTextLabel = function(text) {
 	return element;
 };
 
-UI.createRow = function(rows, id, ld) {
-	console.log("Rows:" + rows);
-	var df = document.createElement("div");
+UI.createRow = function(cols, id, header) {
+	// TODO: Estaba agregando el header de la tabla para introducir los costos de transporte
+	console.log("numCols:" + cols);
+	var df = document.createElement("tr");
 	$(df).attr("id", id);
 	
-	for (var i = 0; i < rows; i ++) {
-		df.appendChild(Simplex.createTextField("var"+i));
+	for (var i = 0; i < cols; i ++) {
+		var td = document.createElement(header?"th":"td");
+		if (header && i == 0);
+		else if (header) td.appendChild(UI.createTextLabel("D" + (i+1)));
+		else td.appendChild(UI.createTextField("var"+i));
+		df.appendChild(td);
 	}
-	if (ld) {
-		var signo = $(document.createElement("span"));
-		signo.html("&nbsp;+&nbsp;");
-		df.appendChild(signo.get(0));
-		df.appendChild(Simplex.createTextField("var"+rows));
-	}
-	df.appendChild(document.createElement("br"));
 	return df;
 };
+
+UI.createTable = function(rows, cols, id, ld) {
+	var table = document.createElement("table");
+	$(table).attr("id", id);
+	
+	table.appendChild(UI.createRow(cols, id + "labels"));
+	for (var i = 0; i < rows; i++) {
+		table.appendChild(UI.createRow(cols, id + "_r" + 1));
+	}
+	return table;
+}
 
 // ------------ Ejecución, Startup ---------------
 //Startup
