@@ -152,12 +152,126 @@ Transporte.prototype.sumaFila = function(indexFila){
     return suma;
 };
 
+// *********************** User Interface ****************
+function UI() { }
+
+UI.getRowData = function(id, ld) {
+	console.log("gettingRowData");
+	var r = $("#" + id);
+	console.log(r);
+	var si = Simplex.currentSimplex;
+	var cols = 1 + si.numVariables + si.numRestricciones + 1;
+	
+	var a = new Array(cols);
+	console.log(cols);
+	
+	for (var i = 0; i < si.numVariables; i++) {
+		var value = r.find("#var" + i).val();
+		value = value == ""? 0 : parseFloat(value);
+		a[i+1] = value;
+	}
+	
+	if (id === "objetivo") {
+		a[0] = 1;
+		for (var i = 0; i < si.numVariables; i++) a[i+1] = -a[i+1];
+		for (var i = si.numVariables, len = cols -1; i < len; i++) a[i+1] = 0;
+		a.unshift("Z");
+	}
+	if (id.indexOf("restriccion") != -1) {
+		a[0] = 0;
+		var num = parseFloat(id.substr(11)) + si.numVariables;
+		console.log("restriccionNum: " + num);
+		for (var i = si.numVariables, len = cols - 1; i < len; i++) {
+			a[i+1] = num == i? 1 : 0;
+		}
+		var value = r.find("#var" + si.numVariables).val();
+		value = value == ""? 0 : parseFloat(value);
+		a[cols-1] = value;
+		a.unshift("S" + (num-si.numVariables + 1));
+	}
+	
+	return a;
+};
+
+UI.showOptions = function() {
+	var si = new Simplex();
+	si.numVariables = parseFloat($("input#numVar").val());
+	si.numRestricciones = parseFloat($("input#numRes").val());
+	
+	
+	Simplex.currentSimplex = si;
+	$("div#startupSection").hide();
+	var inputSection = $("div#inputSection");
+	var iSE = inputSection.get(0);
+	var objetivo = Simplex.createRow(si.numVariables, "objetivo");
+	iSE.appendChild(Simplex.createTextLabel("Muestra: " + si.getSampleEquation()));
+	iSE.appendChild(objetivo);
+	
+	iSE.appendChild(Simplex.createTextLabel("Sujeto a"));
+	for (var i = 0; i < si.numRestricciones; i++) {
+		iSE.appendChild(Simplex.createRow(si.numVariables, "restriccion"+i, true));
+	}
+	
+	var boton = Simplex.createButton("Resolver", "resolver");
+	$(boton).click(function() {
+		Simplex.currentSimplex.run();
+		$("#inputSection").hide();
+		$("#resultSection").show();
+	});
+	iSE.appendChild(boton);
+	
+	inputSection.show();
+};
+
+UI.createTextField = function(id) {
+	var fieldElement = document.createElement("input");
+	var field = $(fieldElement);
+	field.attr("type", "text");
+	field.attr("size", "3");
+	if (id) field.attr("id", id);
+	return fieldElement;
+};
+
+UI.createButton = function(text, id) {
+	var fieldElement = document.createElement("input");
+	var field = $(fieldElement);
+	field.attr("type", "button");
+	field.attr("value", text);
+	if (id) field.attr("id", id);
+	return fieldElement;
+};
+
+UI.createTextLabel = function(text) {
+	var element = document.createElement("p");
+	var p = $(element);
+	p.html(text);
+	return element;
+};
+
+UI.createRow = function(rows, id, ld) {
+	console.log("Rows:" + rows);
+	var df = document.createElement("div");
+	$(df).attr("id", id);
+	
+	for (var i = 0; i < rows; i ++) {
+		df.appendChild(Simplex.createTextField("var"+i));
+	}
+	if (ld) {
+		var signo = $(document.createElement("span"));
+		signo.html("&nbsp;+&nbsp;");
+		df.appendChild(signo.get(0));
+		df.appendChild(Simplex.createTextField("var"+rows));
+	}
+	df.appendChild(document.createElement("br"));
+	return df;
+};
+
 // ------------ Ejecución, Startup ---------------
 //Startup
 $(new function() {
 	$("div#inputSection").hide();
 	$("div#resultSection").hide();
-	$('#iniciar').bind("click", Simplex.showOptions);
+	$('#iniciar').bind("click", UI.showOptions);
 });
 
 var ejemplo = new Transporte();
@@ -165,3 +279,4 @@ ejemplo.ejemplo();
 ejemplo.imprime();
 ejemplo.northwestCorner();
 ejemplo.imprime();
+
