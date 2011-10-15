@@ -14,11 +14,10 @@
  *   2.5x1+2.5x2≤2250
  *   2x1+x2≤1200
  */
-var tabla; //tabla con los costos
-var tabla2;//tabla con las unidades
 
+function Crea() { }
 
-function Crea() {
+Crea.prototype.ejemplo = function() {
 
     var fila1 = new Array(5);
     fila1[0] = "De/a";
@@ -53,14 +52,14 @@ function Crea() {
     fila5[1] = 300;
     fila5[2] = 200;
     fila5[3] = 200;
-    fila5[4] = 700; // se debe calcular al generar la tabla
+    fila5[4] = 700; // se debe calcular al generar la this.tabla
 
-    tabla = new Array(5);
-    tabla[0] = fila1;
-    tabla[1] = fila2;
-    tabla[2] = fila3;
-    tabla[3] = fila4;
-    tabla[4] = fila5;
+    this.tabla = new Array(5);
+    this.tabla[0] = fila1;
+    this.tabla[1] = fila2;
+    this.tabla[2] = fila3;
+    this.tabla[3] = fila4;
+    this.tabla[4] = fila5;
 
     var row1 = new Array(5);
     var row2 = new Array(5);
@@ -68,34 +67,36 @@ function Crea() {
     var row4 = new Array(5);
     var row5 = new Array(5);
 
-    tabla2 = new Array(5);
-    tabla2[0] = row1;
-    tabla2[1] = row2;
-    tabla2[2] = row3;
-    tabla2[3] = row4;
-    tabla2[4] = row5;
+    this.tabla2 = new Array(5);
+    this.tabla2[0] = row1;
+    this.tabla2[1] = row2;
+    this.tabla2[2] = row3;
+    this.tabla2[3] = row4;
+    this.tabla2[4] = row5;
+    
+};
 
-}
+Crea.prototype.tabla = null; //this.tabla con los costos
+Crea.prototype.tabla2 = null;//this.tabla con las unidades
 
-
-function imprime() {
+Crea.prototype.imprime = function() {
     document.write("<table width=200 border=1 cellpadding=1 cellspacing=1>");
-    for (i=0;i<tabla.length;i++){
-   	for (j=0;j<tabla[i].length;j++){
-            if(i == 0 || i == tabla.length-1){
-                if(j==0 || j == tabla.length-1)
-                    document.write("<td>" + tabla[i][j] + "</td>");
+    for (var i=0;i<this.tabla.length;i++){
+   	for (var j=0;j<this.tabla[i].length;j++){
+            if(i == 0 || i == this.tabla.length-1){
+                if(j==0 || j == this.tabla.length-1)
+                    document.write("<td>" + this.tabla[i][j] + "</td>");
                 else
-                    document.write("<td colspan=2>" + tabla[i][j] + "</td>");
+                    document.write("<td colspan=2>" + this.tabla[i][j] + "</td>");
             } else {
-                if(j==0 || j == tabla.length-1)
-                    document.write("<td>" + tabla[i][j] + "</td>");
+                if(j==0 || j == this.tabla.length-1)
+                    document.write("<td>" + this.tabla[i][j] + "</td>");
                 else{
-                    var linea = "<td colspan=2><Table border=1><tr><td>" + tabla[i][j] + "</td></tr></Table>";
-                    if(tabla2[i][j] == undefined)
+                    var linea = "<td colspan=2><Table border=1><tr><td>" + this.tabla[i][j] + "</td></tr></Table>";
+                    if(this.tabla2[i][j] == undefined)
                         linea = linea + "&nbsp;</td>";
                     else
-                        linea = linea + tabla2[i][j] + "</td>";
+                        linea = linea + this.tabla2[i][j] + "</td>";
                     document.write(linea);
                 }
             }
@@ -103,24 +104,24 @@ function imprime() {
    	document.write("</tr>");
     }
     document.write("</table>");
-}
+};
 
-function northwestCorner(){
+Crea.prototype.northwestCorner = function(){
     var i = 1;
     var j = 1;
-    while(!checaTabla()){
-        var r = tabla[i][tabla[i].length-1] - sumaFila(i);
-        var c = tabla[tabla.length-1][j] - sumaColumna(j);
+    while(!this.checaTabla()){
+        var r = this.tabla[i][this.tabla[i].length-1] - this.sumaFila(i);
+        var c = this.tabla[this.tabla.length-1][j] - this.sumaColumna(j);
         if(r<c){
-            tabla2[i][j] = r;
+            this.tabla2[i][j] = r;
         }else{
-            tabla2[i][j] = c;
+            this.tabla2[i][j] = c;
         }
-        r = tabla[i][tabla[i].length-1] - sumaFila(i);
-        c = tabla[tabla.length-1][j] - sumaColumna(j);
+        r = this.tabla[i][this.tabla[i].length-1] - this.sumaFila(i);
+        c = this.tabla[this.tabla.length-1][j] - this.sumaColumna(j);
         if(r==0 && c==0){
-            if(i != tabla.length-2){
-                tabla2[i+1][j] = 0;
+            if(i != this.tabla.length-2){
+                this.tabla2[i+1][j] = 0;
                 i++;
                 j++;
             }
@@ -129,47 +130,48 @@ function northwestCorner(){
         else
             j++;
     }
-}
+};
 
-function checaTabla(){
+Crea.prototype.checaTabla = function(){
     var flag = true;
 
-    for (var i =1; i<tabla2.length-1; i++){
-        if(tabla[i][tabla[i].length-1] - sumaFila(i) != 0)
+    for (var i =1; i<this.tabla2.length-1; i++){
+        if(this.tabla[i][this.tabla[i].length-1] - this.sumaFila(i) != 0)
             flag = false;
     }
 
-    for (i =1; i<tabla2[1].length-1; i++){
-        if(tabla[tabla.length-1][i] - sumaColumna(i) != 0)
+    for (i =1; i<this.tabla2[1].length-1; i++){
+        if(this.tabla[this.tabla.length-1][i] - this.sumaColumna(i) != 0)
             flag = false;
     }
     return flag;
-}
+};
 
-function sumaColumna(indexCol){
+Crea.prototype.sumaColumna = function(indexCol){
     var suma = 0;
-    for (var i =1; i<tabla2.length-1; i++){
-        if(tabla2[i][indexCol]!=undefined)
-            suma += tabla2[i][indexCol];
+    for (var i =1; i<this.tabla2.length-1; i++){
+        if(this.tabla2[i][indexCol]!=undefined)
+            suma += this.tabla2[i][indexCol];
     }
     //alert("SumaCol" + indexCol + ":" + suma);//////quitar
     return suma;
-}
+};
 
-function sumaFila(indexFila){
+Crea.prototype.sumaFila = function(indexFila){
     var suma = 0;
-    for (var i =1; i<tabla2[indexFila].length-1; i++){
-        if(tabla2[indexFila][i]!=undefined)
-            suma += tabla2[indexFila][i];
+    for (var i =1; i<this.tabla2[indexFila].length-1; i++){
+        if(this.tabla2[indexFila][i]!=undefined)
+            suma += this.tabla2[indexFila][i];
     }
     //alert("SumaFila" + indexFila + ":" + suma);//////quitar
     return suma;
-}
+};
 
-function principal() {
-    Crea();
-    imprime();
-    northwestCorner();
-    imprime();
+// Ejecución
+
+var ejemplo = new Crea();
+ejemplo.ejemplo();
+ejemplo.imprime();
+ejemplo.northwestCorner();
+ejemplo.imprime();
      
-}
