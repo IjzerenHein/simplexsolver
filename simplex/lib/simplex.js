@@ -1,21 +1,25 @@
-
 /**
- *  1. Simplex "maximizar s.a."
+ *  Object that wraps simplex operations
  */
 function Simplex() {}
 
 // Globals
+/** Stores the current simplex objects */
 Simplex.currentSimplex = null;
 
 // Variables ------------------------------------------------------------------
+/** Variables array */
 Simplex.prototype.variables = null;
+/** Backup of variables array */
 Simplex.prototype.backup = null;
 Simplex.prototype.numVariables = 0;
 Simplex.prototype.numRestricciones = 0;
+/** Answer array */
 Simplex.prototype.answer = null;
 
 // Methods --------------------------------------------------------------------
 
+/** Gets data from HTML form */
 Simplex.prototype.getData = function() {
 	var si = Simplex.currentSimplex;
 	console.log("GettingData------------");
@@ -54,15 +58,18 @@ Simplex.prototype.getData = function() {
 	console.log(arr);
 }
 
+/** Apply simplex method */
 Simplex.prototype.solve = function() {
 	return principal();
 }
 
+/** Display simplex tables */
 Simplex.prototype.displayResults = function(html) {
 	var result = $("#result");
 	result.html(html);
 }
 
+/** Display graph from results */
 Simplex.prototype.displayGraph = function() {
 	var si = Simplex.currentSimplex;
 	var res = si.answer;
@@ -115,6 +122,7 @@ Simplex.prototype.displayGraph = function() {
 	});
 }
 
+/** Get points for graph */
 Simplex.prototype.getPoints = function(row) {
 	console.log(row.toString());
 	var x1 = row[2];
@@ -126,6 +134,10 @@ Simplex.prototype.getPoints = function(row) {
 	return res;
 }
 
+/* * * * * * * * * * * * * *
+ * Main Solving Function
+ * * * * * * * * * * * * * */
+
 Simplex.prototype.run = function() {
 	console.log("running");
 	var si = Simplex.currentSimplex;
@@ -135,6 +147,7 @@ Simplex.prototype.run = function() {
 	si.displayGraph();
 }
 
+/** Just creates a sample equations according to the number of variables */
 Simplex.prototype.getSampleEquation = function() {
 	var texto = "";
 	var si = Simplex.currentSimplex;
@@ -250,7 +263,7 @@ Simplex.createRow = function(rows, id, ld) {
 	}
 	if (ld) {
 		var signo = $(document.createElement("span"));
-		signo.html("&nbsp;â‰¤&nbsp;");
+		signo.html("&nbsp;²&nbsp;");
 		df.appendChild(signo.get(0));
 		df.appendChild(Simplex.createTextField("var"+rows));
 	}
@@ -267,9 +280,9 @@ $(new function() {
 
 // --------------- SOLVER ----------------
 
-var tabla; //aqui el arreglo lo puse global pero supongo que es el this.variables = {}; del prototype??
-//o tambien se puede que todas las funciones auxiliares lo reciban como un parametro llamado tabla para no cambiar el nombre
-var pivoteV;//supungo que los pivotes tambien serian propiedades del prototype
+var tabla; //This variable store the array obtained from the form
+//These variables will help store de current location of the row and column pivots
+var pivoteV;
 var pivoteH;
 
 function Crea() {
@@ -278,19 +291,21 @@ function Crea() {
 
 }
 
+//Prints the current values of the array in a readable way
 function imprime() {
-	var html = "<table width=200 border=1 cellpadding=1 cellspacing=1>";
+	var html = "<table width=90 border=1 cellpadding=1 cellspacing=1 style='table-layout:fixed;'>";
 	for (i=0;i<tabla.length;i++){
 		for (j=0;j<tabla[i].length;j++){
-			html +="<td>" + tabla[i][j] + "</td>";
+			html +="<td width=90px height=25px style='overflow:hidden'>" + tabla[i][j] + "</td>";
 		}
 		html += "</tr>";
 	}
 	html += "</table>";
+        html += "</br>";
 	return html;
 }
 
-//checo que la fila de la Z no tenga valores negativos
+//checks that the Z row doesn't have negative values
 function filaNegativa() {
 	var negativa = 0;
 	for (var i =1; i<tabla[1].length; i++){
@@ -300,7 +315,7 @@ function filaNegativa() {
 	return negativa;
 }
 
-//busco el mas negativo para el pivote vertical
+//finds the most negative value in the Z row and fix the pivot
 function masNegativo() {
 	var menor = 1;
 	for (var i =1; i<tabla[1].length; i++){
@@ -311,7 +326,7 @@ function masNegativo() {
 	}
 }
 
-//eligo el menor coeficiente para el pivote horizontal
+//Chooses the smallest value from the LD column and pivot column division
 function menorCoeficiente(){
 	//var menorValor = tabla[2][tabla[2].length - 1] / tabla[2][pivoteV];
         var menorValor = Number.MAX_VALUE;
@@ -326,7 +341,7 @@ function menorCoeficiente(){
 	}
 }
 
-//divido la fila donde esta el pivote para hacerlo 1
+//Divides the pivot row by the pivot's value to get the 1
 function igualarAUno(){
 //	alert(tabla[pivoteH][pivoteV]);
 	if(tabla[pivoteH][pivoteV] != 1){
@@ -339,7 +354,7 @@ function igualarAUno(){
 	tabla[pivoteH][0] = tabla[0][pivoteV];
 }
 
-//reviso las filas si son 0 sino las convierto a 0
+//checks if the values of the pivot column are equal to 0, if not calls the igualaACero function
 function revisaFilas(){
 	for(var i=1; i<tabla.length;i++){
 		if(tabla[i][pivoteV] != 0 && i != pivoteH)
@@ -347,7 +362,7 @@ function revisaFilas(){
 	}
 }
 
-//cambio una fila para que tenga 0 en la columna del pivote
+//makes the required calculations to make the pivot column values equal to 0
 function igualaACero(fila){
 	var neg = -tabla[fila][pivoteV];
 	for (var i =1; i<tabla[fila].length; i++){
@@ -356,7 +371,7 @@ function igualaACero(fila){
 	}
 }
 
-//esto es lo de comparar el nombre de las variables para obtener su valor (el tamano del arreglo esta fijo pero el comentario dice cual es su verdadero tamanio)
+//It pairs the variable names to its correct value
 function entregaRespuesta(){
 	var si = Simplex.currentSimplex;
 	var respuesta = new Array(si.numVariables + si.numRestricciones + 1);//variables + restricciones + 1
@@ -380,7 +395,7 @@ function entregaRespuesta(){
 	return respuesta;
 }
 
-//este es el loop que resuelve el simplex supongo que este es el solve del prototype
+//This function loops the simplex method to solve the problem
 function resuelve() {
 	var html = "";
 	while (filaNegativa()){
@@ -390,7 +405,7 @@ function resuelve() {
 		revisaFilas();
 		html += imprime();
 	}
-	var arregloRespuesta = entregaRespuesta();//aqui se regresa el arreglo con las respuestas
+	var arregloRespuesta = entregaRespuesta();//the variable final values are returned
 	Simplex.currentSimplex.answer = arregloRespuesta;
 	html += arregloRespuesta.toString();
 	return html;
