@@ -55,12 +55,67 @@ Crea.prototype.tablaDummy = null;//tabla auxiliar para encontrar los ciclos
 
 Crea.current = null;
 
+Crea.prototype.htmlString = "";
+
 Crea.prototype.inicializaTabla2 = function(){
     this.tabla2 = new Array(this.tabla.length);
     for(var i = 0; i < this.tabla2.length;i++){
         this.tabla2[i] = new Array(this.tabla[i].length);
     }
 };
+
+/*
+Crea.prototype.imprime = function() {
+	var df = document.createDocumentFragment();
+	var table = document.createElement("table");
+	var tablejq = $(table);
+	tablejq.attr("width", 200);
+	tablejq.attr("border", 1);
+	tablejq.attr("cellpadding", 1);
+	tablejq.attr("cellspacing", 1);
+	for ( var i = 0; i < this.tabla.length; i++) {
+		var rf = document.createElement("tr");
+		for ( var j = 0; j < this.tabla[i].length; j++) {
+			var tf = document.createElement("td");
+			var tfjq = $(tf);
+			if (i == 0 || i == this.tabla.length - 1) {
+				if (j == 0 || j == this.tabla.length - 1)
+					tfjq.html(this.tabla[i][j] + "");
+				else {
+					tfjq.attr("colspan", 2);
+					tfjq.html(this.tabla[i][j] + "");
+				}
+			} else {
+				if (j == 0 || j == this.tabla.length - 1)
+					tfjq.html(this.tabla[i][j] + "");
+				else {
+					tfjq.attr("colspan", 2);
+					var innerData = document.createElement("td");
+					$(innerData).html(this.tabla[i][j] + "");
+					var innerRow = document.createElement("tr");
+					innerRow.appendChild(innerData);
+					var innerTable = document.createElement("table");
+					innerTable.appendChild(innerRow);
+					console.log(innerTable);
+					tf.appendChild(innerTable);
+					console.log(tf);
+
+					if (this.tabla2[i][j] != undefined) {
+						var inner = document.createElement("span");
+						$(inner).html(this.tabla2[i][j] + "");
+						tf.appendChild(inner);
+					}
+				}
+			}
+			rf.appendChild(tf);
+		}
+		table.appendChild(rf);
+	}
+	df.appendChild(table);
+	df.appendChild(document.createElement("br"));
+	return df;
+};
+*/
 
 Crea.prototype.imprime = function() {
     var html = "<table width=200 border=1 cellpadding=1 cellspacing=1>";
@@ -88,7 +143,32 @@ Crea.prototype.imprime = function() {
     }
     html += "</table>";
     html += "</br>";
+    html += this.imprimeSolucion();
     return html;
+};
+
+Crea.prototype.imprimeSolucion = function(){
+    var resS = "<p>";
+    var res = 0;
+    var tmp = 0;
+    for (var i=1;i<this.tabla.length-1;i++){
+   	for (var j=1;j<this.tabla[i].length-1;j++){
+            if(this.tabla2[i][j] != undefined){
+                tmp = this.tabla[i][j] * this.tabla2[i][j];
+                if(i == this.tabla.length-2){
+                    resS += tmp + "=";
+                    res += tmp;
+                } else {
+                    resS += tmp + "+";
+                    res += tmp;
+                }
+            }
+        }
+    }
+
+    resS += res + "</p></br>";
+
+    return resS;
 };
 
 Crea.prototype.northwestCorner = function(){
@@ -159,7 +239,7 @@ Crea.prototype.steppingStone = function (){
         this.calculaIndices(indices);
         if(this.indicesNegativos(indices)){
             this.mejoraSolucion(indices);
-            //this.imprime();
+            this.html+= this.imprime();
         }
     } while(this.indicesNegativos(indices));
 };
@@ -494,14 +574,13 @@ Crea.prototype.indicesNegativos = function (indices){
 };
 
 Crea.prototype.run = function() {
-	this.inicializaTabla2();
-	this.northwestCorner();
-	document.write("Primera Solucion Factible (Northwest Corner)");
-	document.write(this.imprime());
-	this.steppingStone();
-	document.write("Solucion Optima");
-	document.write(this.imprime());
 	
+	this.inicializaTabla2();
+	this.html = this.imprime();
+	this.northwestCorner();
+	this.html += "<h3>Primera Solucion Factible (Northwest Corner)</h3>";
+	this.html += this.imprime();
+	this.steppingStone();
 	
 	//Ejecución
 	/*
@@ -544,7 +623,11 @@ UI.getRowData = function(id, index, suma) {
 	var a = new Array(cols);
 	console.log(cols);
 	
-	r.find("input").each(function(index) { a[index] = $(this).val(); });
+	r.find("input").each(function(index) { 
+		var temp = $(this).val();
+		var tempInt = parseInt(temp);
+		a[index] = isNaN(tempInt)? temp : tempInt;
+	});
 	return a;
 };
 
@@ -569,7 +652,11 @@ UI.showOptions = function() {
 		Crea.tabla = UI.setData();
 		Crea.current.run();
 		$("#inputSection").hide();
+		var resultSection = $("#resultSection");
+		console.log(resultSection);
+		resultSection.html(Crea.current.html);
 		$("#resultSection").show();
+		$("#resultSection").get(0).appendChild(df);
 	});
 	iSE.appendChild(boton);
 	
