@@ -38,7 +38,7 @@ Crea.prototype.ejemplo = function() {
     fila5[1] = 300;
     fila5[2] = 200;
     fila5[3] = 200;
-    fila5[4] = 700; // se debe calcular al generar la this.tabla
+    fila5[4] = 700; 
 
     this.tabla = new Array(5);
     this.tabla[0] = fila1;
@@ -49,14 +49,15 @@ Crea.prototype.ejemplo = function() {
 
 };
 
-Crea.prototype.tabla = null; //this.tabla con los costos
-Crea.prototype.tabla2 = null;//this.tabla con las unidades
-Crea.prototype.tablaDummy = null;//tabla auxiliar para encontrar los ciclos
+Crea.prototype.tabla = null; //this.tabla this table holds the costs, supply & demand information
+Crea.prototype.tabla2 = null;//this.tabla this table holds the "units to be transported" information 
+Crea.prototype.tablaDummy = null;//auxiliary table to find the stepping stone loops
 
 Crea.current = null;
 
 Crea.prototype.htmlString = "";
 
+//initializes the tabla2 array with the same dimensions 
 Crea.prototype.inicializaTabla2 = function(){
     this.tabla2 = new Array(this.tabla.length);
     for(var i = 0; i < this.tabla2.length;i++){
@@ -64,6 +65,7 @@ Crea.prototype.inicializaTabla2 = function(){
     }
 };
 
+//this method helps print the problem information in a table
 Crea.prototype.imprime = function() {
     var html = "<table width=200 border=1 cellpadding=1 cellspacing=1>";
     for (var i=0;i<this.tabla.length;i++){
@@ -94,6 +96,7 @@ Crea.prototype.imprime = function() {
     return html;
 };
 
+//prints the optimal value of the current problem information table
 Crea.prototype.imprimeSolucion = function(){
     var resS = "<p>";
     var res = 0;
@@ -118,6 +121,8 @@ Crea.prototype.imprimeSolucion = function(){
     return resS;
 };
 
+//Calculates the first feasible solution of the problem
+//with the Northwest Corner method
 Crea.prototype.northwestCorner = function(){
     var i = 1;
     var j = 1;
@@ -144,6 +149,7 @@ Crea.prototype.northwestCorner = function(){
     }
 };
 
+//checks that the units in the tabla2 table don't exceed the supply or demand restrictions
 Crea.prototype.checaTabla = function(){
     var flag = true;
 
@@ -159,6 +165,7 @@ Crea.prototype.checaTabla = function(){
     return flag;
 };
 
+//adds the values of the indexCol column in tabla2
 Crea.prototype.sumaColumna = function(indexCol){
     var suma = 0;
     for (var i =1; i<this.tabla2.length-1; i++){
@@ -169,6 +176,7 @@ Crea.prototype.sumaColumna = function(indexCol){
     return suma;
 };
 
+//adds the values of the indexFila row in tabla2
 Crea.prototype.sumaFila = function(indexFila){
     var suma = 0;
     for (var i =1; i<this.tabla2[indexFila].length-1; i++){
@@ -179,6 +187,8 @@ Crea.prototype.sumaFila = function(indexFila){
     return suma;
 };
 
+//calculates the reduced cost indexes
+//improving the current solution if a negative index remains 
 Crea.prototype.steppingStone = function (){
     var indices = null;
     do{
@@ -191,6 +201,7 @@ Crea.prototype.steppingStone = function (){
     } while(this.indicesNegativos(indices));
 };
 
+//calculates the reduce cost indexes of all the vacant cells in the tabla2 table
 Crea.prototype.calculaIndices = function (indices) {
     for (var i=1;i<this.tabla2.length-1;i++){
         for (var j=1;j<this.tabla2[i].length-1;j++){
@@ -200,6 +211,7 @@ Crea.prototype.calculaIndices = function (indices) {
     }
 };
 
+//calculates the reduce cost indexes of a single vacant cell in the tabla2 table
 Crea.prototype.calculaIndice = function (fila, columna){
     var indice = new Array();
     var ciclo = new Array();
@@ -215,6 +227,8 @@ Crea.prototype.calculaIndice = function (fila, columna){
     return indice;
 };
 
+//finds the coordinates of the cells in tabla2, that forms a stepping stone loop for the vacant cell stored 
+//in the vecinos array
 Crea.prototype.buscaCiclo = function (vecinos, iteraciones){
     if(!this.repetidos(vecinos)){
         if(this.vecinosFila(vecinos, vecinos[vecinos.length-1][0], iteraciones)){
@@ -238,6 +252,8 @@ Crea.prototype.buscaCiclo = function (vecinos, iteraciones){
     return vecinos;
 };
 
+//creates a dummy table containing only the cells in tabla2, that forms a stepping stone loop for the vacant cell
+//with coordinates (fila,columna)
 Crea.prototype.creaDummy = function (fila, columna){
     var i = 0;
     var j = 0;
@@ -259,6 +275,7 @@ Crea.prototype.creaDummy = function (fila, columna){
     } while (f || c);
 };
 
+//deletes the rows of the dummy table that only have one element
 Crea.prototype.borraFilasTablaDummy = function (fila, columna){
     var res = false;
     var i = 0;
@@ -286,6 +303,7 @@ Crea.prototype.borraFilasTablaDummy = function (fila, columna){
     return res;
 };
 
+//deletes the columns of the dummy table that only have one element
 Crea.prototype.borraColumnasTablaDummy = function (fila, columna){
     var res = false;
     var i = 0;
@@ -313,6 +331,8 @@ Crea.prototype.borraColumnasTablaDummy = function (fila, columna){
     return res;
 };
 
+//checks if there is a value in the indexFila row of the tabla2 to continue 
+//the path of a stepping stone loop
 Crea.prototype.vecinosFila = function (vecinos, indexFila, iteraciones){
     var flag = false;
     var i = 0;
@@ -340,6 +360,8 @@ Crea.prototype.vecinosFila = function (vecinos, indexFila, iteraciones){
     return flag;
 };
 
+//stores the value in the indexFila row of the tabla2 that continues 
+//the current path of the stepping stone loop in the vecinos array
 Crea.prototype.encuentraVecinoFila = function (vecinos, indexFila, iteraciones){
     var i = 0;
     var tmp = new Array();
@@ -367,6 +389,8 @@ Crea.prototype.encuentraVecinoFila = function (vecinos, indexFila, iteraciones){
     return tmp;
 };
 
+//checks if there is a value in the indexCol column of the tabla2 to continue 
+//the path of a stepping stone loop
 Crea.prototype.vecinosColumna = function (vecinos, indexCol, iteraciones){
     var flag = false;
     var i = 0;
@@ -395,6 +419,8 @@ Crea.prototype.vecinosColumna = function (vecinos, indexCol, iteraciones){
     return flag;
 };
 
+//stores the value in the indexFila row of the tabla2 that continues 
+//the current path of the stepping stone loop in the vecinos array
 Crea.prototype.encuentraVecinoColumna = function (vecinos, indexCol, iteraciones){
     var i = 0;
     var tmp = new Array();
@@ -423,6 +449,7 @@ Crea.prototype.encuentraVecinoColumna = function (vecinos, indexCol, iteraciones
     return tmp;
 };
 
+//checks if the array[n][2] a has the element e[2] 
 Crea.prototype.contiene = function (a, e){
     var res = false;
     for(var i = 0; i < a.length;i++){
@@ -432,6 +459,7 @@ Crea.prototype.contiene = function (a, e){
     return res;
 };
 
+//checks if the vecinos array has repeated elements 
 Crea.prototype.repetidos = function (vecinos){
     for(var i=0; i<vecinos.length;i++){
         for(var j=i+1; j<vecinos.length;j++){
@@ -442,6 +470,7 @@ Crea.prototype.repetidos = function (vecinos){
     return false;
 };
 
+//Calculates the reduce cost index of the loop contained in the ciclo array
 Crea.prototype.calculaCiclo = function (ciclo){
     var suma = true;
     var resultado = 0;
@@ -460,6 +489,7 @@ Crea.prototype.calculaCiclo = function (ciclo){
     return resultado;
 };
 
+//improves the current solution with the information in the indices array 
 Crea.prototype.mejoraSolucion = function (indices){
     var mejora = this.masNegativo(indices);
     var ciclo = new Array();
@@ -489,6 +519,7 @@ Crea.prototype.mejoraSolucion = function (indices){
     }
 };
 
+//finds the most negative reduce cost index in the indices array
 Crea.prototype.masNegativo = function(indices){
     var tmp = 1;
     var res = null;
@@ -505,6 +536,8 @@ Crea.prototype.masNegativo = function(indices){
     return res;
 };
 
+//finds the lowest units value of the most negative reduce cost index loop ciclo 
+//to improve the current solution 
 Crea.prototype.menorUnidades = function(ciclo){
     var unidades = Number.MAX_VALUE;
     var suma = true;
@@ -520,6 +553,7 @@ Crea.prototype.menorUnidades = function(ciclo){
     return unidades;
 };
 
+//checks if there is still a negative reduce cost index in the indices array
 Crea.prototype.indicesNegativos = function (indices){
     var flag = false;
     for(var i=0; i<indices.length;i++){
@@ -529,6 +563,7 @@ Crea.prototype.indicesNegativos = function (indices){
     return flag;
 };
 
+//executes the above methods in the correct order to find THE solution
 Crea.prototype.run = function() {
 	
 	this.inicializaTabla2();
