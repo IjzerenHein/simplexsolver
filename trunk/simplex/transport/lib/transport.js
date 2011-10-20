@@ -304,12 +304,16 @@ Crea.prototype.creaDummy = function (fila, columna){
             this.tablaDummy[i][j] = this.tabla2[i][j];
         }
     }
-
-    this.borraFilasTablaDummy(fila, columna);
-    this.borraColumnasTablaDummy(fila, columna);
+    var f = false;
+    var c = false;
+    do{
+        f = this.borraFilasTablaDummy(fila, columna);
+        c = this.borraColumnasTablaDummy(fila, columna);
+    } while (f || c);
 };
 
 Crea.prototype.borraFilasTablaDummy = function (fila, columna){
+    var res = false;
     var i = 0;
     var j = 0;
     var filas = new Array();
@@ -320,7 +324,7 @@ Crea.prototype.borraFilasTablaDummy = function (fila, columna){
                 contador++;
             }
         }
-        if(contador < 2)
+        if(contador === 1)
             filas.push(i);
     }
 
@@ -330,10 +334,13 @@ Crea.prototype.borraFilasTablaDummy = function (fila, columna){
                 this.tablaDummy[filas[i]][j] = undefined;
             }
         }
+        res = true;
     }
+    return res;
 };
 
 Crea.prototype.borraColumnasTablaDummy = function (fila, columna){
+    var res = false;
     var i = 0;
     var j = 0;
     var columnas = new Array();
@@ -344,7 +351,7 @@ Crea.prototype.borraColumnasTablaDummy = function (fila, columna){
                 contador++;
             }
         }
-        if(contador < 2)
+        if(contador === 1)
             columnas.push(i);
     }
 
@@ -354,7 +361,9 @@ Crea.prototype.borraColumnasTablaDummy = function (fila, columna){
                 this.tablaDummy[j][columnas[i]] = undefined;
             }
         }
+        res = true;
     }
+    return res;
 };
 
 Crea.prototype.vecinosFila = function (vecinos, indexFila, iteraciones){
