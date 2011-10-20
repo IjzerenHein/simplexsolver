@@ -496,7 +496,12 @@ Crea.prototype.indicesNegativos = function (indices){
 Crea.prototype.run = function() {
 	this.inicializaTabla2();
 	this.northwestCorner();
+	document.write("Primera Solucion Factible (Northwest Corner)");
+	document.write(this.imprime());
 	this.steppingStone();
+	document.write("Solucion Optima");
+	document.write(this.imprime());
+	
 	
 	//Ejecución
 	/*
@@ -517,41 +522,29 @@ Crea.prototype.run = function() {
 // *********************** User Interface ****************
 function UI() { }
 
-UI.getRowData = function(id, ld) {
+UI.setData = function() {
+	var data = new Array();
+	var si = Crea.current;
+	for (var i = 0, len = si.numOrigenes + 2; i < len; i++) {
+		if (i===0) data[i] = UI.getRowData("origen_header");
+		else if (i===(len-1)) data[i] = UI.getRowData("origen_totals", i /*index*/, true /*suma*/);
+		else data[i] = UI.getRowData("origen_r" + (i - 1));
+	}
+	si.tabla = data;
+	console.log(data);
+};
+
+UI.getRowData = function(id, index, suma) {
 	console.log("gettingRowData");
 	var r = $("#" + id);
 	console.log(r);
 	var si = Crea.current;
-	var cols = 1 + si.numVariables + si.numRestricciones + 1;
+	var cols = si.numDestinos + 2;
 	
 	var a = new Array(cols);
 	console.log(cols);
 	
-	for (var i = 0; i < si.numVariables; i++) {
-		var value = r.find("#var" + i).val();
-		value = value == ""? 0 : parseFloat(value);
-		a[i+1] = value;
-	}
-	
-	if (id === "objetivo") {
-		a[0] = 1;
-		for (var i = 0; i < si.numVariables; i++) a[i+1] = -a[i+1];
-		for (var i = si.numVariables, len = cols -1; i < len; i++) a[i+1] = 0;
-		a.unshift("Z");
-	}
-	if (id.indexOf("restriccion") != -1) {
-		a[0] = 0;
-		var num = parseFloat(id.substr(11)) + si.numVariables;
-		console.log("restriccionNum: " + num);
-		for (var i = si.numVariables, len = cols - 1; i < len; i++) {
-			a[i+1] = num == i? 1 : 0;
-		}
-		var value = r.find("#var" + si.numVariables).val();
-		value = value == ""? 0 : parseFloat(value);
-		a[cols-1] = value;
-		a.unshift("S" + (num-si.numVariables + 1));
-	}
-	
+	r.find("input").each(function(index) { a[index] = $(this).val(); });
 	return a;
 };
 
@@ -573,7 +566,8 @@ UI.showOptions = function() {
 	
 	var boton = UI.createButton("Resolver", "resolver");
 	$(boton).click(function() {
-		Crea.currentSimplex.run();
+		Crea.tabla = UI.setData();
+		Crea.current.run();
 		$("#inputSection").hide();
 		$("#resultSection").show();
 	});
@@ -615,13 +609,29 @@ UI.createRow = function(cols, id, index, header) {
 	
 	for (var i = 0, len = cols + 2; i < len; i ++) {
 		var td = document.createElement(header?"th":"td");
-		if (header === 1 && i == 0); // se salta la esquina
-		else if (header === 1 && i === (len -1)) td.appendChild(UI.createTextLabel("Oferta"));
-		else if (header === 1) td.appendChild(UI.createTextLabel("D" + i));
-		else if (header === 2 && i == 0) td.appendChild(UI.createTextLabel("Demanda"));
+		var temp = UI.createTextField(id + "_var" + i);
+		if (header === 1 && i == 0) {
+			$(temp).attr("readonly", "readonly");
+			$(temp).val("De/a");
+		} // se salta la esquina
+		else if (header === 1 && i === (len -1)) {
+			$(temp).attr("readonly", "readonly");
+			$(temp).val("Oferta");
+		}
+		else if (header === 1)  {
+			$(temp).attr("readonly", "readonly");
+			$(temp).val("D" + i);
+		}
+		else if (header === 2 && i == 0)  {
+			$(temp).attr("readonly", "readonly");
+			$(temp).val("Demanda");
+		}
 		else if (header === 2 && i === (len -1));
-		else if (i == 0) td.appendChild(UI.createTextLabel("O" + index));
-		else td.appendChild(UI.createTextField(id + "_var"+i));
+		else if (i == 0)  {
+			$(temp).attr("readonly", "readonly");
+			$(temp).val("O" + index);
+		}
+		td.appendChild(temp);
 		df.appendChild(td);
 	}
 	return df;
