@@ -64,59 +64,6 @@ Crea.prototype.inicializaTabla2 = function(){
     }
 };
 
-/*
-Crea.prototype.imprime = function() {
-	var df = document.createDocumentFragment();
-	var table = document.createElement("table");
-	var tablejq = $(table);
-	tablejq.attr("width", 200);
-	tablejq.attr("border", 1);
-	tablejq.attr("cellpadding", 1);
-	tablejq.attr("cellspacing", 1);
-	for ( var i = 0; i < this.tabla.length; i++) {
-		var rf = document.createElement("tr");
-		for ( var j = 0; j < this.tabla[i].length; j++) {
-			var tf = document.createElement("td");
-			var tfjq = $(tf);
-			if (i == 0 || i == this.tabla.length - 1) {
-				if (j == 0 || j == this.tabla.length - 1)
-					tfjq.html(this.tabla[i][j] + "");
-				else {
-					tfjq.attr("colspan", 2);
-					tfjq.html(this.tabla[i][j] + "");
-				}
-			} else {
-				if (j == 0 || j == this.tabla.length - 1)
-					tfjq.html(this.tabla[i][j] + "");
-				else {
-					tfjq.attr("colspan", 2);
-					var innerData = document.createElement("td");
-					$(innerData).html(this.tabla[i][j] + "");
-					var innerRow = document.createElement("tr");
-					innerRow.appendChild(innerData);
-					var innerTable = document.createElement("table");
-					innerTable.appendChild(innerRow);
-					console.log(innerTable);
-					tf.appendChild(innerTable);
-					console.log(tf);
-
-					if (this.tabla2[i][j] != undefined) {
-						var inner = document.createElement("span");
-						$(inner).html(this.tabla2[i][j] + "");
-						tf.appendChild(inner);
-					}
-				}
-			}
-			rf.appendChild(tf);
-		}
-		table.appendChild(rf);
-	}
-	df.appendChild(table);
-	df.appendChild(document.createElement("br"));
-	return df;
-};
-*/
-
 Crea.prototype.imprime = function() {
     var html = "<table width=200 border=1 cellpadding=1 cellspacing=1>";
     for (var i=0;i<this.tabla.length;i++){
@@ -127,7 +74,7 @@ Crea.prototype.imprime = function() {
                 else
                     html += "<td colspan=2>" + this.tabla[i][j] + "</td>";
             } else {
-                if(j==0 || j == this.tabla.length-1)
+                if(j==0 || j == this.tabla[i].length-1)
                     html += "<td>" + this.tabla[i][j] + "</td>";
                 else{
                     var linea = "<td colspan=2><Table border=1><tr><td>" + this.tabla[i][j] + "</td></tr></Table>";
@@ -663,9 +610,9 @@ UI.showOptions = function() {
 		$("#inputSection").hide();
 		var resultSection = $("#resultSection");
 		console.log(resultSection);
+		Crea.current.html += "<p><strong>Terminado</strong></p>";
 		resultSection.html(Crea.current.html);
 		$("#resultSection").show();
-		$("#resultSection").get(0).appendChild(df);
 	});
 	iSE.appendChild(boton);
 	
@@ -716,7 +663,7 @@ UI.createRow = function(cols, id, index, header) {
 		}
 		else if (header === 1)  {
 			$(temp).attr("readonly", "readonly");
-			$(temp).val("D" + i);
+			$(temp).val("Destino" + i);
 		}
 		else if (header === 2 && i == 0)  {
 			$(temp).attr("readonly", "readonly");
@@ -725,7 +672,7 @@ UI.createRow = function(cols, id, index, header) {
 		else if (header === 2 && i === (len -1));
 		else if (i == 0)  {
 			$(temp).attr("readonly", "readonly");
-			$(temp).val("O" + index);
+			$(temp).val("Origen" + index);
 		}
 		td.appendChild(temp);
 		df.appendChild(td);
