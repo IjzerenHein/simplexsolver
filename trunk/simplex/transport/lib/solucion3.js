@@ -61,24 +61,18 @@ Crea.prototype.ejemplo = function() {
     this.tabla[3] = fila4;
     this.tabla[4] = fila5;
 
-    var row1 = new Array(5);
-    var row2 = new Array(5);
-    var row3 = new Array(5);
-    var row4 = new Array(5);
-    var row5 = new Array(5);
-
-    this.tabla2 = new Array(5);
-    this.tabla2[0] = row1;
-    this.tabla2[1] = row2;
-    this.tabla2[2] = row3;
-    this.tabla2[3] = row4;
-    this.tabla2[4] = row5;
-
 };
 
 Crea.prototype.tabla = null; //this.tabla con los costos
 Crea.prototype.tabla2 = null;//this.tabla con las unidades
 Crea.prototype.tablaDummy = null;//tabla auxiliar para encontrar los ciclos
+
+Crea.prototype.inicializaTabla2 = function(){
+    this.tabla2 = new Array(this.tabla.length);
+    for(i = 0; i < this.tabla2.length;i++){
+        this.tabla2[i] = new Array(this.tabla[i].length);
+    }
+};
 
 Crea.prototype.imprime = function() {
     var html = "<table width=200 border=1 cellpadding=1 cellspacing=1>";
@@ -514,9 +508,10 @@ Crea.prototype.indicesNegativos = function (indices){
 
 var ejemplo = new Crea();
 ejemplo.ejemplo();
+ejemplo.inicializaTabla2();
 
 ejemplo.northwestCorner();
-document.write("Primera Solucion Optima (Northwest Corner)");
+document.write("Primera Solucion Factible (Northwest Corner)");
 document.write(ejemplo.imprime());
 ejemplo.steppingStone();
 document.write("Solucion Optima");
