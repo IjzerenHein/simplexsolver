@@ -81,30 +81,32 @@ Crea.prototype.tabla2 = null;//this.tabla con las unidades
 Crea.prototype.tablaDummy = null;//tabla auxiliar para encontrar los ciclos
 
 Crea.prototype.imprime = function() {
-    document.write("<table width=200 border=1 cellpadding=1 cellspacing=1>");
+    var html = "<table width=200 border=1 cellpadding=1 cellspacing=1>";
     for (var i=0;i<this.tabla.length;i++){
    	for (var j=0;j<this.tabla[i].length;j++){
             if(i == 0 || i == this.tabla.length-1){
                 if(j==0 || j == this.tabla.length-1)
-                    document.write("<td>" + this.tabla[i][j] + "</td>");
+                    html += "<td>" + this.tabla[i][j] + "</td>";
                 else
-                    document.write("<td colspan=2>" + this.tabla[i][j] + "</td>");
+                    html += "<td colspan=2>" + this.tabla[i][j] + "</td>";
             } else {
                 if(j==0 || j == this.tabla.length-1)
-                    document.write("<td>" + this.tabla[i][j] + "</td>");
+                    html += "<td>" + this.tabla[i][j] + "</td>";
                 else{
                     var linea = "<td colspan=2><Table border=1><tr><td>" + this.tabla[i][j] + "</td></tr></Table>";
                     if(this.tabla2[i][j] == undefined)
                         linea = linea + "&nbsp;</td>";
                     else
                         linea = linea + this.tabla2[i][j] + "</td>";
-                    document.write(linea);
+                    html += linea;
                 }
             }
    	}
-   	document.write("</tr>");
+   	html += "</tr>";
     }
-    document.write("</table>");
+    html += "</table>";
+    html += "</br>";
+    return html;
 };
 
 Crea.prototype.northwestCorner = function(){
@@ -175,7 +177,7 @@ Crea.prototype.steppingStone = function (){
         this.calculaIndices(indices);
         if(this.indicesNegativos(indices)){
             this.mejoraSolucion(indices);
-            this.imprime();
+            //this.imprime();
         }
     } while(this.indicesNegativos(indices));
 };
@@ -512,7 +514,10 @@ Crea.prototype.indicesNegativos = function (indices){
 
 var ejemplo = new Crea();
 ejemplo.ejemplo();
-ejemplo.imprime();
+
 ejemplo.northwestCorner();
-ejemplo.imprime();
+document.write("Primera Solucion Optima (Northwest Corner)");
+document.write(ejemplo.imprime());
 ejemplo.steppingStone();
+document.write("Solucion Optima");
+document.write(ejemplo.imprime());
