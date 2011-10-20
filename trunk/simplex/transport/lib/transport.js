@@ -66,7 +66,7 @@ Crea.prototype.inicializaTabla2 = function(){
 };
 
 //this method helps print the problem information in a table
-Crea.prototype.imprime = function() {
+Crea.prototype.imprime = function(noRes) {
     var html = "<table width=200 border=1 cellpadding=1 cellspacing=1>";
     for (var i=0;i<this.tabla.length;i++){
    	for (var j=0;j<this.tabla[i].length;j++){
@@ -92,7 +92,7 @@ Crea.prototype.imprime = function() {
     }
     html += "</table>";
     html += "</br>";
-    html += this.imprimeSolucion();
+    if (!noRes) html += this.imprimeSolucion();
     return html;
 };
 
@@ -567,7 +567,7 @@ Crea.prototype.indicesNegativos = function (indices){
 Crea.prototype.run = function() {
 	
 	this.inicializaTabla2();
-	this.html = this.imprime();
+	this.html = this.imprime(true);
 	this.northwestCorner();
 	this.html += "<h3>Primera Solucion Factible (Northwest Corner)</h3>";
 	this.html += this.imprime();
