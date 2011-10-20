@@ -78,6 +78,7 @@ Crea.prototype.ejemplo = function() {
 
 Crea.prototype.tabla = null; //this.tabla con los costos
 Crea.prototype.tabla2 = null;//this.tabla con las unidades
+Crea.prototype.tablaDummy = null;//tabla auxiliar para encontrar los ciclos
 
 Crea.prototype.imprime = function() {
     document.write("<table width=200 border=1 cellpadding=1 cellspacing=1>");
@@ -168,11 +169,14 @@ Crea.prototype.sumaFila = function(indexFila){
 };
 
 Crea.prototype.steppingStone = function (){
-    var indices = new Array();
+    var indices = null;
     do{
+        indices = new Array();
         this.calculaIndices(indices);
-        if(this.indicesNegativos(indices))
+        if(this.indicesNegativos(indices)){
             this.mejoraSolucion(indices);
+            this.imprime();
+        }
     } while(this.indicesNegativos(indices));
 };
 
@@ -193,6 +197,7 @@ Crea.prototype.calculaIndice = function (fila, columna){
     var vecinos = new Array();
     vecinos.push([fila,columna]);
     var iteraciones = 0;
+    this.creaDummy(fila, columna);
     ciclo = this.buscaCiclo(vecinos, iteraciones);
     ciclo.pop();//quita repetido
     indice[0] = this.calculaCiclo(ciclo);
@@ -222,24 +227,90 @@ Crea.prototype.buscaCiclo = function (vecinos, iteraciones){
     return vecinos;
 };
 
+Crea.prototype.creaDummy = function (fila, columna){
+    var i = 0;
+    var j = 0;
+    this.tablaDummy = new Array(this.tabla2.length);
+    for(i = 0; i < this.tablaDummy.length;i++){
+        this.tablaDummy[i] = new Array(this.tabla2[i].length);
+    }
+
+    for(i = 0; i < this.tabla2.length; i++){
+        for(j = 0; j < this.tabla2[i].length;j++){
+            this.tablaDummy[i][j] = this.tabla2[i][j];
+        }
+    }
+
+    this.borraFilasTablaDummy(fila, columna);
+    this.borraColumnasTablaDummy(fila, columna);
+};
+
+Crea.prototype.borraFilasTablaDummy = function (fila, columna){
+    var i = 0;
+    var j = 0;
+    var filas = new Array();
+    for(i = 0; i < this.tablaDummy.length; i++){
+        var contador = 0;
+        for(j =0; j < this.tablaDummy[0].length; j++){
+            if( (this.tablaDummy[i][j]!=undefined) || (i==fila && j===columna) ){
+                contador++;
+            }
+        }
+        if(contador < 2)
+            filas.push(i);
+    }
+
+    if(filas.length > 0){
+        for(i = 0; i < filas.length; i++){
+            for(j =0; j<this.tablaDummy[filas[i]].length; j++){
+                this.tablaDummy[filas[i]][j] = undefined;
+            }
+        }
+    }
+};
+
+Crea.prototype.borraColumnasTablaDummy = function (fila, columna){
+    var i = 0;
+    var j = 0;
+    var columnas = new Array();
+    for(i = 0; i < this.tablaDummy[0].length; i++){
+        var contador = 0;
+        for(j =0; j < this.tablaDummy.length; j++){
+            if( (this.tablaDummy[j][i]!=undefined) || (j==fila && i===columna) ){
+                contador++;
+            }
+        }
+        if(contador < 2)
+            columnas.push(i);
+    }
+
+    if(columnas.length > 0){
+        for(i = 0; i < columnas.length; i++){
+            for(j =0; j<this.tablaDummy.length; j++){
+                this.tablaDummy[j][columnas[i]] = undefined;
+            }
+        }
+    }
+};
+
 Crea.prototype.vecinosFila = function (vecinos, indexFila, iteraciones){
     var flag = false;
     var i = 0;
     var tmp = new Array();
     if(iteraciones < 3){
-        for (i =1; i<this.tabla2[indexFila].length-1; i++){
-            if(this.tabla2[indexFila][i]!=undefined){
+        for (i =1; i<this.tablaDummy[indexFila].length-1; i++){
+            if(this.tablaDummy[indexFila][i]!=undefined){
                 tmp = [indexFila,i];
                 if(!this.contiene(vecinos, tmp))
                     flag = true;
             }
         }
     } else {
-         for (i =1; i<this.tabla2[indexFila].length-1; i++){
+         for (i =1; i<this.tablaDummy[indexFila].length-1; i++){
             tmp = [indexFila,i];
             if(tmp[0]==vecinos[0][0]&&tmp[1]==vecinos[0][1]){
                 flag = true
-            } else if(this.tabla2[indexFila][i]!=undefined){
+            } else if(this.tablaDummy[indexFila][i]!=undefined){
                 tmp = [indexFila,i];
                 if(!this.contiene(vecinos, tmp))
                     flag = true;
@@ -254,19 +325,19 @@ Crea.prototype.encuentraVecinoFila = function (vecinos, indexFila, iteraciones){
     var tmp = new Array();
     tmp = [0,0];
     if(iteraciones < 3){
-        for (i =1; i<this.tabla2[indexFila].length-1; i++){
-            if(this.tabla2[indexFila][i]!=undefined){
+        for (i =1; i<this.tablaDummy[indexFila].length-1; i++){
+            if(this.tablaDummy[indexFila][i]!=undefined){
                 tmp = [indexFila,i];
                 if(!this.contiene(vecinos, tmp))
                     return tmp;
             }
         }
     } else {
-         for (i =1; i<this.tabla2[indexFila].length-1; i++){
+         for (i =1; i<this.tablaDummy[indexFila].length-1; i++){
             tmp = [indexFila,i];
             if(tmp[0]==vecinos[0][0]&&tmp[1]==vecinos[0][1]){
                 return tmp;
-            } else if(this.tabla2[indexFila][i]!=undefined){
+            } else if(this.tablaDummy[indexFila][i]!=undefined){
                 tmp = [indexFila,i];
                 if(!this.contiene(vecinos, tmp))
                     return tmp;
@@ -281,19 +352,19 @@ Crea.prototype.vecinosColumna = function (vecinos, indexCol, iteraciones){
     var i = 0;
     var tmp = new Array();
     if(iteraciones < 3){
-        for (i =1; i<this.tabla2.length-1; i++){
-            if(this.tabla2[i][indexCol]!=undefined){
+        for (i =1; i<this.tablaDummy.length-1; i++){
+            if(this.tablaDummy[i][indexCol]!=undefined){
                 tmp = [i,indexCol];
                 if(!this.contiene(vecinos, tmp))
                     flag = true;
             }
         }
     } else {
-        for (i =1; i<this.tabla2.length-1; i++){
+        for (i =1; i<this.tablaDummy.length-1; i++){
             tmp = [i,indexCol];
             if(tmp[0]==vecinos[0][0]&&tmp[1]==vecinos[0][1]){
                 flag = true;
-            }else if(this.tabla2[i][indexCol]!=undefined){
+            }else if(this.tablaDummy[i][indexCol]!=undefined){
                 tmp = [i,indexCol];
                 if(!this.contiene(vecinos, tmp))
                     flag = true;
@@ -309,19 +380,19 @@ Crea.prototype.encuentraVecinoColumna = function (vecinos, indexCol, iteraciones
     var tmp = new Array();
     tmp = [0,0];
     if(iteraciones < 3){
-        for (i =1; i<this.tabla2.length-1; i++){
-            if(this.tabla2[i][indexCol]!=undefined){
+        for (i =1; i<this.tablaDummy.length-1; i++){
+            if(this.tablaDummy[i][indexCol]!=undefined){
                 tmp = [i,indexCol];
                 if(!this.contiene(vecinos, tmp))
                     return tmp;
             }
         }
     } else {
-        for (i =1; i<this.tabla2.length-1; i++){
+        for (i =1; i<this.tablaDummy.length-1; i++){
             tmp = [i,indexCol];
             if(tmp[0]==vecinos[0][0]&&tmp[1]==vecinos[0][1]){
                 return tmp;
-            }else if(this.tabla2[i][indexCol]!=undefined){
+            }else if(this.tablaDummy[i][indexCol]!=undefined){
                 tmp = [i,indexCol];
                 if(!this.contiene(vecinos, tmp))
                     return tmp;
@@ -370,9 +441,63 @@ Crea.prototype.calculaCiclo = function (ciclo){
 };
 
 Crea.prototype.mejoraSolucion = function (indices){
-    for(var i=0; i<indices.length;i++){
-        indices[i][0] = 0;
+    var mejora = this.masNegativo(indices);
+    var ciclo = new Array();
+    var vecinos = new Array();
+    vecinos.push([ mejora[1] , mejora[2] ]);
+    var iteraciones = 0;
+    this.creaDummy(mejora[1], mejora[2]);
+    ciclo = this.buscaCiclo(vecinos, iteraciones);
+    ciclo.pop();//quita repetido
+    var unidades = this.menorUnidades(ciclo);
+
+    var suma = true;
+    for(var i = 0; i<ciclo.length;i++){
+        if(suma){
+            if(this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] != undefined){
+                this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] = this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] + unidades;
+                suma = false;
+            } else
+                this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] = unidades;
+                suma = false;
+        } else{
+            this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] = this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] - unidades;
+            if(this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] == 0)
+               this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] = undefined;
+            suma = true;
+        }
     }
+};
+
+Crea.prototype.masNegativo = function(indices){
+    var tmp = 1;
+    var res = null;
+    var i = 0;
+    for(i=0; i<indices.length;i++){
+        if(indices[i][0] < tmp)
+            tmp = indices[i][0];
+    }
+
+    for(i=0; i<indices.length;i++){
+        if(indices[i][0] == tmp)
+            res = indices[i];
+    }
+    return res;
+};
+
+Crea.prototype.menorUnidades = function(ciclo){
+    var unidades = Number.MAX_VALUE;
+    var suma = true;
+    for(var i = 0; i<ciclo.length;i++){
+        if(suma){
+            suma = false;
+        } else{
+            if(this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] < unidades)
+                unidades = this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ];
+            suma = true;
+        }
+    }
+    return unidades;
 };
 
 Crea.prototype.indicesNegativos = function (indices){
