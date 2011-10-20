@@ -103,6 +103,30 @@ Crea.prototype.imprime = function() {
     return html;
 };
 
+Crea.prototype.imprimeSolucion = function(){
+    var resS = "";
+    var res = 0;
+    var tmp = 0;
+    for (var i=1;i<this.tabla.length-1;i++){
+   	for (var j=1;j<this.tabla[i].length-1;j++){
+            if(this.tabla2[i][j] != undefined){
+                tmp = this.tabla[i][j] * this.tabla2[i][j];
+                if(i == this.tabla.length-2){
+                    resS += tmp + "=";
+                    res += tmp;
+                } else {
+                    resS += tmp + "+";
+                    res += tmp;
+                }
+            }
+        }
+    }
+
+    resS += res + "</br></br>";
+
+    return resS;
+};
+
 Crea.prototype.northwestCorner = function(){
     var i = 1;
     var j = 1;
@@ -171,7 +195,8 @@ Crea.prototype.steppingStone = function (){
         this.calculaIndices(indices);
         if(this.indicesNegativos(indices)){
             this.mejoraSolucion(indices);
-            //this.imprime();
+            document.write(this.imprime());
+            document.write(this.imprimeSolucion());
         }
     } while(this.indicesNegativos(indices));
 };
@@ -513,6 +538,5 @@ ejemplo.inicializaTabla2();
 ejemplo.northwestCorner();
 document.write("Primera Solucion Factible (Northwest Corner)");
 document.write(ejemplo.imprime());
+document.write(ejemplo.imprimeSolucion());
 ejemplo.steppingStone();
-document.write("Solucion Optima");
-document.write(ejemplo.imprime());
