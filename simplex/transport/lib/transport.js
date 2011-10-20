@@ -1,13 +1,9 @@
-// ************ TRANSPORTE ***************
+// ************ Transporte ***************
 
-function Transporte() { }
 
-Transporte.current = null;
+function Crea() { }
 
-Transporte.prototype.tabla = null; //this.tabla con los costos
-Transporte.prototype.tabla2 = null;//this.tabla con las unidades
-
-Transporte.prototype.ejemplo = function() {
+Crea.prototype.ejemplo = function() {
 
     var fila1 = new Array(5);
     fila1[0] = "De/a";
@@ -51,49 +47,51 @@ Transporte.prototype.ejemplo = function() {
     this.tabla[3] = fila4;
     this.tabla[4] = fila5;
 
-    var row1 = new Array(5);
-    var row2 = new Array(5);
-    var row3 = new Array(5);
-    var row4 = new Array(5);
-    var row5 = new Array(5);
-
-    this.tabla2 = new Array(5);
-    this.tabla2[0] = row1;
-    this.tabla2[1] = row2;
-    this.tabla2[2] = row3;
-    this.tabla2[3] = row4;
-    this.tabla2[4] = row5;
-    
 };
 
-Transporte.prototype.imprime = function() {
-    document.write("<table width=200 border=1 cellpadding=1 cellspacing=1>");
+Crea.prototype.tabla = null; //this.tabla con los costos
+Crea.prototype.tabla2 = null;//this.tabla con las unidades
+Crea.prototype.tablaDummy = null;//tabla auxiliar para encontrar los ciclos
+
+Crea.current = null;
+
+Crea.prototype.inicializaTabla2 = function(){
+    this.tabla2 = new Array(this.tabla.length);
+    for(var i = 0; i < this.tabla2.length;i++){
+        this.tabla2[i] = new Array(this.tabla[i].length);
+    }
+};
+
+Crea.prototype.imprime = function() {
+    var html = "<table width=200 border=1 cellpadding=1 cellspacing=1>";
     for (var i=0;i<this.tabla.length;i++){
    	for (var j=0;j<this.tabla[i].length;j++){
             if(i == 0 || i == this.tabla.length-1){
                 if(j==0 || j == this.tabla.length-1)
-                    document.write("<td>" + this.tabla[i][j] + "</td>");
+                    html += "<td>" + this.tabla[i][j] + "</td>";
                 else
-                    document.write("<td colspan=2>" + this.tabla[i][j] + "</td>");
+                    html += "<td colspan=2>" + this.tabla[i][j] + "</td>";
             } else {
                 if(j==0 || j == this.tabla.length-1)
-                    document.write("<td>" + this.tabla[i][j] + "</td>");
+                    html += "<td>" + this.tabla[i][j] + "</td>";
                 else{
                     var linea = "<td colspan=2><Table border=1><tr><td>" + this.tabla[i][j] + "</td></tr></Table>";
                     if(this.tabla2[i][j] == undefined)
                         linea = linea + "&nbsp;</td>";
                     else
                         linea = linea + this.tabla2[i][j] + "</td>";
-                    document.write(linea);
+                    html += linea;
                 }
             }
    	}
-   	document.write("</tr>");
+   	html += "</tr>";
     }
-    document.write("</table>");
+    html += "</table>";
+    html += "</br>";
+    return html;
 };
 
-Transporte.prototype.northwestCorner = function(){
+Crea.prototype.northwestCorner = function(){
     var i = 1;
     var j = 1;
     while(!this.checaTabla()){
@@ -119,7 +117,7 @@ Transporte.prototype.northwestCorner = function(){
     }
 };
 
-Transporte.prototype.checaTabla = function(){
+Crea.prototype.checaTabla = function(){
     var flag = true;
 
     for (var i =1; i<this.tabla2.length-1; i++){
@@ -134,7 +132,7 @@ Transporte.prototype.checaTabla = function(){
     return flag;
 };
 
-Transporte.prototype.sumaColumna = function(indexCol){
+Crea.prototype.sumaColumna = function(indexCol){
     var suma = 0;
     for (var i =1; i<this.tabla2.length-1; i++){
         if(this.tabla2[i][indexCol]!=undefined)
@@ -144,7 +142,7 @@ Transporte.prototype.sumaColumna = function(indexCol){
     return suma;
 };
 
-Transporte.prototype.sumaFila = function(indexFila){
+Crea.prototype.sumaFila = function(indexFila){
     var suma = 0;
     for (var i =1; i<this.tabla2[indexFila].length-1; i++){
         if(this.tabla2[indexFila][i]!=undefined)
@@ -154,6 +152,368 @@ Transporte.prototype.sumaFila = function(indexFila){
     return suma;
 };
 
+Crea.prototype.steppingStone = function (){
+    var indices = null;
+    do{
+        indices = new Array();
+        this.calculaIndices(indices);
+        if(this.indicesNegativos(indices)){
+            this.mejoraSolucion(indices);
+            //this.imprime();
+        }
+    } while(this.indicesNegativos(indices));
+};
+
+Crea.prototype.calculaIndices = function (indices) {
+    for (var i=1;i<this.tabla2.length-1;i++){
+        for (var j=1;j<this.tabla2[i].length-1;j++){
+            if (this.tabla2[i][j] == undefined)
+                indices.push(this.calculaIndice(i,j));
+        }
+    }
+};
+
+Crea.prototype.calculaIndice = function (fila, columna){
+    var indice = new Array();
+    var ciclo = new Array();
+
+    indice = [0,fila,columna];
+    var vecinos = new Array();
+    vecinos.push([fila,columna]);
+    var iteraciones = 0;
+    this.creaDummy(fila, columna);
+    ciclo = this.buscaCiclo(vecinos, iteraciones);
+    ciclo.pop();//quita repetido
+    indice[0] = this.calculaCiclo(ciclo);
+    return indice;
+};
+
+Crea.prototype.buscaCiclo = function (vecinos, iteraciones){
+    if(!this.repetidos(vecinos)){
+        if(this.vecinosFila(vecinos, vecinos[vecinos.length-1][0], iteraciones)){
+            var tmp = this.encuentraVecinoFila(vecinos, vecinos[vecinos.length-1][0], iteraciones);
+            vecinos.push(tmp);
+            iteraciones++;
+            vecinos = this.buscaCiclo(vecinos, iteraciones);
+        }
+        if(!this.repetidos(vecinos)){
+            if(this.vecinosColumna(vecinos, vecinos[vecinos.length-1][1], iteraciones)){
+                var tmp2 = this.encuentraVecinoColumna(vecinos, vecinos[vecinos.length-1][1], iteraciones);
+                vecinos.push(tmp2);
+                iteraciones++;
+                vecinos = this.buscaCiclo(vecinos, iteraciones);
+            } else {
+                vecinos.pop();
+                iteraciones--;
+            }
+        }
+    }
+    return vecinos;
+};
+
+Crea.prototype.creaDummy = function (fila, columna){
+    var i = 0;
+    var j = 0;
+    this.tablaDummy = new Array(this.tabla2.length);
+    for(i = 0; i < this.tablaDummy.length;i++){
+        this.tablaDummy[i] = new Array(this.tabla2[i].length);
+    }
+
+    for(i = 0; i < this.tabla2.length; i++){
+        for(j = 0; j < this.tabla2[i].length;j++){
+            this.tablaDummy[i][j] = this.tabla2[i][j];
+        }
+    }
+
+    this.borraFilasTablaDummy(fila, columna);
+    this.borraColumnasTablaDummy(fila, columna);
+};
+
+Crea.prototype.borraFilasTablaDummy = function (fila, columna){
+    var i = 0;
+    var j = 0;
+    var filas = new Array();
+    for(i = 0; i < this.tablaDummy.length; i++){
+        var contador = 0;
+        for(j =0; j < this.tablaDummy[0].length; j++){
+            if( (this.tablaDummy[i][j]!=undefined) || (i==fila && j===columna) ){
+                contador++;
+            }
+        }
+        if(contador < 2)
+            filas.push(i);
+    }
+
+    if(filas.length > 0){
+        for(i = 0; i < filas.length; i++){
+            for(j =0; j<this.tablaDummy[filas[i]].length; j++){
+                this.tablaDummy[filas[i]][j] = undefined;
+            }
+        }
+    }
+};
+
+Crea.prototype.borraColumnasTablaDummy = function (fila, columna){
+    var i = 0;
+    var j = 0;
+    var columnas = new Array();
+    for(i = 0; i < this.tablaDummy[0].length; i++){
+        var contador = 0;
+        for(j =0; j < this.tablaDummy.length; j++){
+            if( (this.tablaDummy[j][i]!=undefined) || (j==fila && i===columna) ){
+                contador++;
+            }
+        }
+        if(contador < 2)
+            columnas.push(i);
+    }
+
+    if(columnas.length > 0){
+        for(i = 0; i < columnas.length; i++){
+            for(j =0; j<this.tablaDummy.length; j++){
+                this.tablaDummy[j][columnas[i]] = undefined;
+            }
+        }
+    }
+};
+
+Crea.prototype.vecinosFila = function (vecinos, indexFila, iteraciones){
+    var flag = false;
+    var i = 0;
+    var tmp = new Array();
+    if(iteraciones < 3){
+        for (i =1; i<this.tablaDummy[indexFila].length-1; i++){
+            if(this.tablaDummy[indexFila][i]!=undefined){
+                tmp = [indexFila,i];
+                if(!this.contiene(vecinos, tmp))
+                    flag = true;
+            }
+        }
+    } else {
+         for (i =1; i<this.tablaDummy[indexFila].length-1; i++){
+            tmp = [indexFila,i];
+            if(tmp[0]==vecinos[0][0]&&tmp[1]==vecinos[0][1]){
+                flag = true;
+            } else if(this.tablaDummy[indexFila][i]!=undefined){
+                tmp = [indexFila,i];
+                if(!this.contiene(vecinos, tmp))
+                    flag = true;
+            }
+        }
+    }
+    return flag;
+};
+
+Crea.prototype.encuentraVecinoFila = function (vecinos, indexFila, iteraciones){
+    var i = 0;
+    var tmp = new Array();
+    tmp = [0,0];
+    if(iteraciones < 3){
+        for (i =1; i<this.tablaDummy[indexFila].length-1; i++){
+            if(this.tablaDummy[indexFila][i]!=undefined){
+                tmp = [indexFila,i];
+                if(!this.contiene(vecinos, tmp))
+                    return tmp;
+            }
+        }
+    } else {
+         for (i =1; i<this.tablaDummy[indexFila].length-1; i++){
+            tmp = [indexFila,i];
+            if(tmp[0]==vecinos[0][0]&&tmp[1]==vecinos[0][1]){
+                return tmp;
+            } else if(this.tablaDummy[indexFila][i]!=undefined){
+                tmp = [indexFila,i];
+                if(!this.contiene(vecinos, tmp))
+                    return tmp;
+            }
+        }
+    }
+    return tmp;
+};
+
+Crea.prototype.vecinosColumna = function (vecinos, indexCol, iteraciones){
+    var flag = false;
+    var i = 0;
+    var tmp = new Array();
+    if(iteraciones < 3){
+        for (i =1; i<this.tablaDummy.length-1; i++){
+            if(this.tablaDummy[i][indexCol]!=undefined){
+                tmp = [i,indexCol];
+                if(!this.contiene(vecinos, tmp))
+                    flag = true;
+            }
+        }
+    } else {
+        for (i =1; i<this.tablaDummy.length-1; i++){
+            tmp = [i,indexCol];
+            if(tmp[0]==vecinos[0][0]&&tmp[1]==vecinos[0][1]){
+                flag = true;
+            }else if(this.tablaDummy[i][indexCol]!=undefined){
+                tmp = [i,indexCol];
+                if(!this.contiene(vecinos, tmp))
+                    flag = true;
+            }
+        }
+    }
+
+    return flag;
+};
+
+Crea.prototype.encuentraVecinoColumna = function (vecinos, indexCol, iteraciones){
+    var i = 0;
+    var tmp = new Array();
+    tmp = [0,0];
+    if(iteraciones < 3){
+        for (i =1; i<this.tablaDummy.length-1; i++){
+            if(this.tablaDummy[i][indexCol]!=undefined){
+                tmp = [i,indexCol];
+                if(!this.contiene(vecinos, tmp))
+                    return tmp;
+            }
+        }
+    } else {
+        for (i =1; i<this.tablaDummy.length-1; i++){
+            tmp = [i,indexCol];
+            if(tmp[0]==vecinos[0][0]&&tmp[1]==vecinos[0][1]){
+                return tmp;
+            }else if(this.tablaDummy[i][indexCol]!=undefined){
+                tmp = [i,indexCol];
+                if(!this.contiene(vecinos, tmp))
+                    return tmp;
+            }
+        }
+    }
+
+    return tmp;
+};
+
+Crea.prototype.contiene = function (a, e){
+    var res = false;
+    for(var i = 0; i < a.length;i++){
+        if(a[i][0] == e[0] && a[i][1] == e[1] )
+            res = true;
+    }
+    return res;
+};
+
+Crea.prototype.repetidos = function (vecinos){
+    for(var i=0; i<vecinos.length;i++){
+        for(var j=i+1; j<vecinos.length;j++){
+            if(vecinos[i][0]==vecinos[j][0] && vecinos[i][1]==vecinos[j][1])
+                    return true;
+        }
+    }
+    return false;
+};
+
+Crea.prototype.calculaCiclo = function (ciclo){
+    var suma = true;
+    var resultado = 0;
+    for(var i = 0; i<ciclo.length;i++){
+        if(suma){
+            if(this.tabla[ ciclo[i][0] ][ ciclo[i][1] ] != undefined){
+                resultado += this.tabla[ ciclo[i][0] ][ ciclo[i][1] ];
+                suma = false;
+            } else
+                suma = false;
+        } else{
+            resultado -= this.tabla[ ciclo[i][0] ][ ciclo[i][1] ];
+            suma = true;
+        }
+    }
+    return resultado;
+};
+
+Crea.prototype.mejoraSolucion = function (indices){
+    var mejora = this.masNegativo(indices);
+    var ciclo = new Array();
+    var vecinos = new Array();
+    vecinos.push([ mejora[1] , mejora[2] ]);
+    var iteraciones = 0;
+    this.creaDummy(mejora[1], mejora[2]);
+    ciclo = this.buscaCiclo(vecinos, iteraciones);
+    ciclo.pop();//quita repetido
+    var unidades = this.menorUnidades(ciclo);
+
+    var suma = true;
+    for(var i = 0; i<ciclo.length;i++){
+        if(suma){
+            if(this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] != undefined){
+                this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] = this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] + unidades;
+                suma = false;
+            } else
+                this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] = unidades;
+                suma = false;
+        } else{
+            this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] = this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] - unidades;
+            if(this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] == 0)
+               this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] = undefined;
+            suma = true;
+        }
+    }
+};
+
+Crea.prototype.masNegativo = function(indices){
+    var tmp = 1;
+    var res = null;
+    var i = 0;
+    for(i=0; i<indices.length;i++){
+        if(indices[i][0] < tmp)
+            tmp = indices[i][0];
+    }
+
+    for(i=0; i<indices.length;i++){
+        if(indices[i][0] == tmp)
+            res = indices[i];
+    }
+    return res;
+};
+
+Crea.prototype.menorUnidades = function(ciclo){
+    var unidades = Number.MAX_VALUE;
+    var suma = true;
+    for(var i = 0; i<ciclo.length;i++){
+        if(suma){
+            suma = false;
+        } else{
+            if(this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ] < unidades)
+                unidades = this.tabla2[ ciclo[i][0] ][ ciclo[i][1] ];
+            suma = true;
+        }
+    }
+    return unidades;
+};
+
+Crea.prototype.indicesNegativos = function (indices){
+    var flag = false;
+    for(var i=0; i<indices.length;i++){
+        if(indices[i][0] < 0)
+            flag = true;
+    }
+    return flag;
+};
+
+Crea.prototype.run = function() {
+	this.inicializaTabla2();
+	this.northwestCorner();
+	this.steppingStone();
+	
+	//Ejecución
+	/*
+
+	var ejemplo = new Crea();
+	ejemplo.ejemplo();
+	ejemplo.inicializaTabla2();
+
+	ejemplo.northwestCorner();
+	document.write("Primera Solucion Factible (Northwest Corner)");
+	document.write(ejemplo.imprime());
+	ejemplo.steppingStone();
+	document.write("Solucion Optima");
+	document.write(ejemplo.imprime());
+	*/
+};
+
 // *********************** User Interface ****************
 function UI() { }
 
@@ -161,7 +521,7 @@ UI.getRowData = function(id, ld) {
 	console.log("gettingRowData");
 	var r = $("#" + id);
 	console.log(r);
-	var si = Transporte.current;
+	var si = Crea.current;
 	var cols = 1 + si.numVariables + si.numRestricciones + 1;
 	
 	var a = new Array(cols);
@@ -196,24 +556,24 @@ UI.getRowData = function(id, ld) {
 };
 
 UI.showOptions = function() {
-	var si = new Transporte();
+	var si = new Crea();
 	si.numOrigenes = parseFloat($("input#numVar").val());
 	si.numDestinos = parseFloat($("input#numRes").val());
 	
 	
-	Transporte.current = si;
+	Crea.current = si;
 	$("div#startupSection").hide();
 	var inputSection = $("div#inputSection");
 	var iSE = inputSection.get(0); // Obtener sin jQuery
 	
 	iSE.appendChild(UI.createTextLabel("Costos de transporte"));
-	iSE.appendChild(UI.createTable(si.numOrigenes, si.numDestinos, "origen"));
+	iSE.appendChild(UI.createTable(si.numOrigenes, si.numDestinos, "origen")); // Se suma 1 por la fila/columna de totales
 	iSE.appendChild(document.createElement("br"));
 	
 	
 	var boton = UI.createButton("Resolver", "resolver");
 	$(boton).click(function() {
-		Transporte.currentSimplex.run();
+		Crea.currentSimplex.run();
 		$("#inputSection").hide();
 		$("#resultSection").show();
 	});
@@ -247,32 +607,37 @@ UI.createTextLabel = function(text) {
 	return element;
 };
 
-UI.createRow = function(cols, id, header) {
-	// TODO: Estaba agregando el header de la tabla para introducir los costos de transporte
+UI.createRow = function(cols, id, index, header) {
+	// TODO: Estaba agregando el header de la tabla para introducir los costos de Crea
 	console.log("numCols:" + cols);
 	var df = document.createElement("tr");
 	$(df).attr("id", id);
 	
-	for (var i = 0; i < cols; i ++) {
+	for (var i = 0, len = cols + 2; i < len; i ++) {
 		var td = document.createElement(header?"th":"td");
-		if (header && i == 0);
-		else if (header) td.appendChild(UI.createTextLabel("D" + (i+1)));
-		else td.appendChild(UI.createTextField("var"+i));
+		if (header === 1 && i == 0); // se salta la esquina
+		else if (header === 1 && i === (len -1)) td.appendChild(UI.createTextLabel("Oferta"));
+		else if (header === 1) td.appendChild(UI.createTextLabel("D" + i));
+		else if (header === 2 && i == 0) td.appendChild(UI.createTextLabel("Demanda"));
+		else if (header === 2 && i === (len -1));
+		else if (i == 0) td.appendChild(UI.createTextLabel("O" + index));
+		else td.appendChild(UI.createTextField(id + "_var"+i));
 		df.appendChild(td);
 	}
 	return df;
 };
 
-UI.createTable = function(rows, cols, id, ld) {
+UI.createTable = function(rows, cols, id) {
 	var table = document.createElement("table");
 	$(table).attr("id", id);
 	
-	table.appendChild(UI.createRow(cols, id + "labels"));
+	table.appendChild(UI.createRow(cols, id + "_header", -1, 1));
 	for (var i = 0; i < rows; i++) {
-		table.appendChild(UI.createRow(cols, id + "_r" + 1));
+		table.appendChild(UI.createRow(cols, id + "_r" + i, i+1));
 	}
+	table.appendChild(UI.createRow(cols, id + "_totals", -1, 2));
 	return table;
-}
+};
 
 // ------------ Ejecución, Startup ---------------
 //Startup
@@ -281,10 +646,3 @@ $(new function() {
 	$("div#resultSection").hide();
 	$('#iniciar').bind("click", UI.showOptions);
 });
-
-var ejemplo = new Transporte();
-ejemplo.ejemplo();
-ejemplo.imprime();
-ejemplo.northwestCorner();
-ejemplo.imprime();
-
