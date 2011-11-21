@@ -15,7 +15,11 @@ public class Solver {
 	public double[] objetivo = new double[noVariables];
 	public double[][] restricciones = new double[noRestricciones][noVariables+2];
 	
-	public double precision = 0.01;
+	/********************************************David**********************************************/
+	
+	
+	
+	/*******************************************Alejandro*******************************************/
 	
 	
 	public Solver() {
@@ -29,8 +33,13 @@ public class Solver {
 	}
 	
 	/** Genera una solucion aleatoria dentro del rango de las restricciones (factible)*/
-	public void generaUnaSolucionInicial() {
-		
+	public double[] generaUnaSolucionInicial() {
+		double[] solucion = new double[noVariables];
+		boolean encontrada = false;
+		while(!encontrada){
+			
+		}
+		return solucion;
 	}
 	
 	/** disminuye siempre la temperatura en X cantidad */
