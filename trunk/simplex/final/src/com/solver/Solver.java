@@ -15,6 +15,9 @@ public class Solver {
 	public double[] objetivo = new double[noVariables];
 	public double[][] restricciones = new double[noRestricciones][noVariables+2];
 	
+	public double precision = 0.01;
+	
+	
 	public Solver() {
 		// TOOD: Inicializar temperatura
 	}
@@ -50,6 +53,11 @@ public class Solver {
 		prob = Math.exp(-Math.abs(posible-actual)/this.temperatura);
 		
 		return Math.random() < prob;
+	}
+	
+	/** los vecinos a una distancia definida por <b>precision</b> */
+	public void vecinos() {
+		
 	}
 	
 	public static void main(String[] args) {
