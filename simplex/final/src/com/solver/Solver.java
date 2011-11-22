@@ -17,6 +17,7 @@ public class Solver {
 	
 	/********************************************David**********************************************/
 	
+	public final double precisionFinal = 0.01;
 	
 	
 	/*******************************************Alejandro*******************************************/
@@ -67,6 +68,13 @@ public class Solver {
 	/** los vecinos a una distancia definida por <b>precision</b> */
 	public void vecinos() {
 		
+	}
+	
+	
+	/** Se obtiene una precisión dependiente de la temperatura */
+	public double getPrecision() {
+		double precision = temperatura * 0.1; 
+		return precision<precisionFinal?precision : precisionFinal;
 	}
 	
 	public static void main(String[] args) {
