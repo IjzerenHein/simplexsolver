@@ -58,22 +58,29 @@ public class Solver {
 	}
 	
 	/** revisa que los valores de la solucion "posible" cumplan con la restriccion "restriccion" */
-	public boolean pruebaRestriccion(double [] posible, double [] restriccion) {
+	public double pruebaRestriccion(double [] posible, double [] restriccion) {
 		boolean res = false;
 		double temp = 0.0;
 		for(int i = 0; i < posible.length; i++)
 			temp += restriccion[i] * posible[i];
+		double diferencia = Math.abs(restriccion[restriccion.length-1] - temp);
 		if(restriccion[restriccion.length-2] == this.LT){
 			if(temp < restriccion[restriccion.length-1])
-				return true;
+				return diferencia;
+			else
+				return -diferencia;
 		} else if(restriccion[restriccion.length-2] == this.EQ){
 			if(temp == restriccion[restriccion.length-1])
-				return true;			
+				return diferencia;
+			else
+				return -diferencia;			
 		} else if(restriccion[restriccion.length-2] == this.GT){
 			if(temp > restriccion[restriccion.length-1])
-				return true;						
+				return diferencia;
+			else
+				return -diferencia;						
 		}
-		return res;
+		return -diferencia;
 	}
 	
 	/** disminuye siempre la temperatura en X cantidad */
@@ -86,13 +93,20 @@ public class Solver {
 	public double queTanBuenoEs(double[] posible) {
 		boolean cumple = true;
 		for(int i = 0; i < restricciones.length && cumple; i++){
-			cumple &= pruebaRestriccion(posible, restricciones[i]);
+			cumple &= pruebaRestriccion(posible, restricciones[i]) >= 0;
 		}
 		
 		if(cumple)
 			return calculaZ(posible);
-		else
-			return -1.0;
+		else{
+			double diferencia = 0.0;
+			for(int i = 0; i < restricciones.length; i++){
+				if(pruebaRestriccion(posible, restricciones[i]) < 0)
+					diferencia += pruebaRestriccion(posible, restricciones[i]);
+			}			
+			return diferencia;
+		}
+			
 	}
 	
 	/** Calcula Z */
