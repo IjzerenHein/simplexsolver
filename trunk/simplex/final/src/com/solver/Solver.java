@@ -36,11 +36,28 @@ public class Solver {
 	/** Genera una solucion aleatoria dentro del rango de las restricciones (factible)*/
 	public double[] generaUnaSolucionInicial() {
 		double[] solucion = new double[noVariables];
-		boolean encontrada = false;
-		while(!encontrada){
-			
-		}
+		for(int i = 0; i < solucion.length; i++)
+			solucion[i] = Math.random() * Integer.MAX_VALUE;
 		return solucion;
+	}
+	
+	/** revisa que los valores de la solucion "posible" cumplan con la restriccion "restriccion" */
+	public boolean pruebaRestriccion(double [] posible, double [] restriccion) {
+		boolean res = false;
+		double temp = 0.0;
+		for(int i = 0; i < posible.length; i++)
+			temp += restriccion[i] * posible[i];
+		if(restriccion[restriccion.length-2] == this.LT){
+			if(temp < restriccion[restriccion.length-1])
+				return true;
+		} else if(restriccion[restriccion.length-2] == this.EQ){
+			if(temp == restriccion[restriccion.length-1])
+				return true;			
+		} else if(restriccion[restriccion.length-2] == this.GT){
+			if(temp > restriccion[restriccion.length-1])
+				return true;						
+		}
+		return res;
 	}
 	
 	/** disminuye siempre la temperatura en X cantidad */
@@ -48,10 +65,28 @@ public class Solver {
 		
 	}
 	
-	/** Funcion de evaluación, calcular Z */
-	public void queTanBuenoEs() {
+	/** Funcion de evaluacion: Separar en casos si no se cumplen las restricciones se le da un valor negativo e ignorar Z 
+	 *  Si cumple con las restricciones, solo tomar en cuenta el valor de Z */
+	public double queTanBuenoEs(double[] posible) {
+		boolean cumple = true;
+		for(int i = 0; i < restricciones.length && cumple; i++){
+			cumple &= pruebaRestriccion(posible, restricciones[i]);
+		}
 		
+		if(cumple)
+			return calculaZ(posible);
+		else
+			return -1.0;
 	}
+	
+	/** Calcula Z */
+	public double calculaZ(double[] posible){
+		double res = 0.0;
+		for(int i = 0; i < posible.length; i++)
+			res += this.objetivo[i] * posible[i];
+		return res;
+	}
+	
 	
 	/** Probabilidad de aceptar */
 	public boolean boltzmann(double actual, double posible) {
