@@ -1,9 +1,16 @@
 package com.solver;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.LinkedList;
+
 public class Solver {
 	
+	public static NumberFormat df = new DecimalFormat("#0.000");
+	
 	int noRestricciones = 3;
-	int noVariables = 5;
+	int noVariables = 2;
 	boolean max = true;
 	final double LT = 1;
 	final double EQ = 2;
@@ -15,6 +22,8 @@ public class Solver {
 	public double[] objetivo = new double[noVariables];
 	public double[][] restricciones = new double[noRestricciones][noVariables+2];
 	
+	public double[] solucionActual;
+	
 	/********************************************David**********************************************/
 	
 	public final double precisionFinal = 0.01;
@@ -24,13 +33,19 @@ public class Solver {
 	
 	
 	public Solver() {
-		// TOOD: Inicializar temperatura
+		// TODO: Inicializar temperatura
+		temperatura = 100000;
 	}
 	
 	public void entrada() {
 		double[] objetivo = {10, 15};
 		this.objetivo = objetivo;
-		double[] r1;
+		double[] r1 = {5, 10, LT, 100};
+		double[] r2 = {2.5, 2.5, LT, 2250};
+		double[] r3 = {2, 1, LT, 1200};
+		this.restricciones[0] = r1;
+		this.restricciones[1] = r2;
+		this.restricciones[2] = r3;
 	}
 	
 	/** Genera una solucion aleatoria dentro del rango de las restricciones (factible)*/
@@ -38,6 +53,7 @@ public class Solver {
 		double[] solucion = new double[noVariables];
 		for(int i = 0; i < solucion.length; i++)
 			solucion[i] = Math.random() * Integer.MAX_VALUE;
+		solucionActual = solucion;
 		return solucion;
 	}
 	
@@ -62,7 +78,7 @@ public class Solver {
 	
 	/** disminuye siempre la temperatura en X cantidad */
 	public void actualizaTemperatura() {
-		
+		temperatura -= temperaturaPaso;
 	}
 	
 	/** Funcion de evaluacion: Separar en casos si no se cumplen las restricciones se le da un valor negativo e ignorar Z 
@@ -101,10 +117,17 @@ public class Solver {
 	}
 	
 	/** los vecinos a una distancia definida por <b>precision</b> */
-	public void vecinos() {
+	public double[] vecinos() {
 		
+		double precision = getPrecision();
+		double[] vecinoElegido = new double[noVariables];
+		for (int i = 0; i < noVariables; i++) {
+			double rand = Math.random();
+			if (rand >= 0.5) vecinoElegido[i] = solucionActual[i] + precision;
+			else vecinoElegido[i] = solucionActual[i] - precision;
+		}
+		return vecinoElegido;
 	}
-	
 	
 	/** Se obtiene una precisión dependiente de la temperatura */
 	public double getPrecision() {
@@ -112,9 +135,31 @@ public class Solver {
 		return precision<precisionFinal?precision : precisionFinal;
 	}
 	
+	public static String printArray(double[] a) {
+		StringBuilder b = new StringBuilder();
+		b.append("[");
+		for (double d : a) {
+			b.append(df.format(d));			
+			b.append(",");
+		}
+		b.append("]");
+		return b.toString();
+	}
+	
 	public static void main(String[] args) {
 		Solver s = new Solver();
 		s.entrada();
+		s.generaUnaSolucionInicial();
+		int i = 0;
+		while (s.temperatura > 0) {
+			double[] posible = s.vecinos();
+			boolean acepto = s.boltzmann(s.queTanBuenoEs(s.solucionActual), s.queTanBuenoEs(posible));
+			if (acepto) s.solucionActual = posible;
+			s.actualizaTemperatura();
+			if (i % 10000 == 0) System.out.println(i + " - " + printArray(s.solucionActual)  + ", " + s.temperatura);
+			i++;
+		}
+		System.out.println(printArray(s.solucionActual));
 	}
 	
 }
