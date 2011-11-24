@@ -1,5 +1,7 @@
 package com.solver;
 
+//  Tomado de http://www.lawebdelprogramador.com/foros/Algoritmia/710641-Algoritmo_de_gauss_jordan_en_java.html
+
 import java.util.*; 
 public class Gauss_Jordan 
 { 
